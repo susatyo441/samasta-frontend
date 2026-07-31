@@ -34,10 +34,10 @@ const mobileOpen = ref(false)
       </ul>
 
       <div class="hidden items-center gap-3 lg:flex">
-        <a href="#" class="text-sm font-medium text-samasta-muted transition hover:text-samasta-burgundy">
+        <NuxtLink to="/login" class="text-sm font-medium text-samasta-muted transition hover:text-samasta-burgundy">
           Masuk
-        </a>
-        <a href="#" class="btn-primary !px-5 !py-2.5">Buat Undangan</a>
+        </NuxtLink>
+        <NuxtLink to="/register" class="btn-primary !px-5 !py-2.5">Buat Undangan</NuxtLink>
       </div>
 
       <button
@@ -70,8 +70,8 @@ const mobileOpen = ref(false)
           </a>
         </li>
         <li class="flex gap-3 pt-2">
-          <a href="#" class="btn-secondary flex-1 text-center">Masuk</a>
-          <a href="#" class="btn-primary flex-1 text-center">Buat Undangan</a>
+          <NuxtLink to="/login" class="btn-secondary flex-1 text-center" @click="mobileOpen = false">Masuk</NuxtLink>
+          <NuxtLink to="/register" class="btn-primary flex-1 text-center" @click="mobileOpen = false">Buat Undangan</NuxtLink>
         </li>
       </ul>
     </div>

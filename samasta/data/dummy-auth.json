@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "id": "user-001",
+      "name": "Tania Faradila",
+      "email": "demo@samasta.app",
+      "password": "samasta123",
+      "phone": "081234567890",
+      "avatarInitials": "TF",
+      "plan": "Premium",
+      "createdAt": "2026-06-12"
+    },
+    {
+      "id": "user-002",
+      "name": "Raka Pratama",
+      "email": "raka@samasta.app",
+      "password": "ultah123",
+      "phone": "081298765432",
+      "avatarInitials": "RP",
+      "plan": "Gratis",
+      "createdAt": "2026-07-01"
+    }
+  ]
+}

@@ -33,7 +33,7 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full bg-samasta-burgundy px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-samasta-burgundy/20 transition hover:bg-samasta-burgundy-dark hover:shadow-xl;
+    @apply inline-flex items-center justify-center rounded-full bg-samasta-burgundy px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-samasta-burgundy-dark;
   }
 
   .btn-secondary {
@@ -42,5 +42,13 @@
 
   .card {
     @apply rounded-2xl border border-samasta-burgundy/10 bg-white p-6 shadow-sm transition hover:shadow-md;
+  }
+
+  .dash-card {
+    @apply rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm backdrop-blur-sm sm:p-5;
+  }
+
+  .feature-tile {
+    @apply flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl bg-samasta-burgundy px-2 text-center text-white shadow-soft transition active:scale-[0.98] hover:bg-samasta-burgundy-dark;
   }
 }

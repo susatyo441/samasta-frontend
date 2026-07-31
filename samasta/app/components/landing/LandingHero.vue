@@ -37,7 +37,7 @@ const previewCards = [
         </p>
 
         <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <a href="#" class="btn-primary min-w-[200px]">Buat Undangan Gratis</a>
+          <NuxtLink to="/register" class="btn-primary min-w-[200px]">Buat Undangan Gratis</NuxtLink>
           <a href="#tema" class="btn-secondary min-w-[200px]">Lihat Contoh Tema</a>
         </div>
 
