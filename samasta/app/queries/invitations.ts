@@ -151,7 +151,7 @@ export async function updateInvitation(
 export async function uploadInvitationMedia(
   invitationId: string | number,
   file: File,
-  type: 'cover' | 'gallery',
+  type: 'cover' | 'gallery' | 'qris',
   label?: string,
 ) {
   const $larafetch = useSanctumClient()

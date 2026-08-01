@@ -67,12 +67,17 @@ export function createInvitationDraft(invitation: Invitation): InvitationEditorD
       cashlessEnabled: Boolean(invitation.gift?.cashlessEnabled),
       shippingEnabled: Boolean(invitation.gift?.shippingEnabled),
       wishlistEnabled: Boolean(invitation.gift?.wishlistEnabled),
+      qrisEnabled: Boolean(invitation.gift?.qrisEnabled),
       bankAccounts: invitation.gift?.bankAccounts?.length
         ? invitation.gift.bankAccounts
         : [{ bankName: '', accountNumber: '', accountHolder: '' }],
       wishlistItems: invitation.gift?.wishlistItems?.length
         ? invitation.gift.wishlistItems
         : [{ name: '', price: 0 }],
+      shippingAddress: invitation.gift?.shippingAddress || '',
+      qrisImage: invitation.gift?.qrisImage
+        ? structuredClone(invitation.gift.qrisImage)
+        : null,
     }),
     settings: {
       showCountdown: Boolean(invitation.settings?.showCountdown ?? true),
@@ -142,6 +147,7 @@ export function buildModulePayload(moduleId: string, draft: InvitationEditorDraf
           cashlessEnabled: Boolean(draft.gift.cashlessEnabled),
           shippingEnabled: Boolean(draft.gift.shippingEnabled),
           wishlistEnabled: Boolean(draft.gift.wishlistEnabled),
+          qrisEnabled: Boolean(draft.gift.qrisEnabled),
           bankAccounts: (draft.gift.bankAccounts || [])
             .map((acc) => ({
               bankName: acc.bankName.trim(),
@@ -155,6 +161,8 @@ export function buildModulePayload(moduleId: string, draft: InvitationEditorDraf
               price: Number(item.price) || 0,
             }))
             .filter((item) => item.name),
+          shippingAddress: draft.gift.shippingAddress?.trim() || '',
+          qrisImage: draft.gift.qrisImage || null,
         },
       }
     case 'rsvp':

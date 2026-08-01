@@ -2,9 +2,11 @@ export interface InvitationGift {
   cashlessEnabled?: boolean
   shippingEnabled?: boolean
   wishlistEnabled?: boolean
+  qrisEnabled?: boolean
   bankAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
   shippingAddress?: string
   wishlistItems?: Array<{ name: string; price: number }>
+  qrisImage?: InvitationMedia | null
 }
 
 export interface InvitationGuest {

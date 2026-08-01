@@ -22,10 +22,24 @@ async function copyAccount(accountNumber: string) {
   }
 }
 
+const showQris = computed(
+  () => Boolean(props.gift.qrisEnabled && props.gift.qrisImage?.url),
+)
+
+const showBanks = computed(
+  () => Boolean(props.gift.cashlessEnabled && props.gift.bankAccounts?.length),
+)
+
+const showWishlist = computed(
+  () => Boolean(props.gift.wishlistEnabled && props.gift.wishlistItems?.length),
+)
+
+const showShipping = computed(
+  () => Boolean(props.gift.shippingEnabled && props.gift.shippingAddress?.trim()),
+)
+
 const hasGift = computed(
-  () =>
-    Boolean(props.gift.cashlessEnabled && props.gift.bankAccounts?.length) ||
-    Boolean(props.gift.wishlistEnabled && props.gift.wishlistItems?.length),
+  () => showQris.value || showBanks.value || showWishlist.value || showShipping.value,
 )
 </script>
 
@@ -33,7 +47,19 @@ const hasGift = computed(
   <div v-if="hasGift" class="space-y-3">
     <h2 class="cp-section-title">Kado & Amplop</h2>
 
-    <div v-if="gift.cashlessEnabled" class="space-y-2">
+    <article v-if="showQris" class="cp-card !p-4 text-center">
+      <p class="text-xs uppercase tracking-wider text-samasta-muted">QRIS</p>
+      <p class="mt-1 text-sm text-samasta-muted">Scan untuk transfer</p>
+      <div class="mx-auto mt-4 aspect-square w-48 overflow-hidden rounded-xl border border-[var(--cp-line)] bg-white">
+        <img
+          :src="gift.qrisImage!.url"
+          :alt="gift.qrisImage?.label || 'QRIS'"
+          class="h-full w-full object-contain p-3"
+        >
+      </div>
+    </article>
+
+    <div v-if="showBanks" class="space-y-2">
       <article
         v-for="(acc, idx) in gift.bankAccounts"
         :key="idx"
@@ -53,7 +79,14 @@ const hasGift = computed(
       </article>
     </div>
 
-    <div v-if="gift.wishlistEnabled" class="space-y-2">
+    <article v-if="showShipping" class="cp-card !p-4">
+      <p class="text-xs uppercase tracking-wider text-samasta-muted">Kirim Kado</p>
+      <p class="mt-2 whitespace-pre-line text-sm text-samasta-charcoal">
+        {{ gift.shippingAddress }}
+      </p>
+    </article>
+
+    <div v-if="showWishlist" class="space-y-2">
       <article
         v-for="(item, idx) in gift.wishlistItems"
         :key="idx"
