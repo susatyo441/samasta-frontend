@@ -1,52 +1,25 @@
 <script setup lang="ts">
-import type { Invitation } from '~/types'
+import type { InvitationEditorDraft } from '~/utils/invitationEditor'
+import { EDITOR_INPUT_CLASS } from '~/utils/invitationEditor'
 
-const props = defineProps<{
-  invitation: Invitation
+defineProps<{
+  draft: InvitationEditorDraft
 }>()
-
-const title = ref('')
-const autoplay = ref(false)
-const streamingUrl = ref('')
-
-watch(
-  () => [props.invitation.music, props.invitation.streamingUrl] as const,
-  ([music, url]) => {
-    title.value = music?.title ?? ''
-    autoplay.value = Boolean(music?.autoplay)
-    streamingUrl.value = url ?? ''
-  },
-  { immediate: true },
-)
-
-function getPayload() {
-  return {
-    music: {
-      title: title.value.trim() || undefined,
-      autoplay: autoplay.value,
-    },
-    streamingUrl: streamingUrl.value.trim() || null,
-  }
-}
-
-defineExpose({ getPayload })
 </script>
 
 <template>
-  <div class="space-y-4 rounded-2xl bg-samasta-cream p-4">
+  <div class="space-y-3">
     <div>
       <label class="text-xs font-medium text-samasta-muted">Judul lagu</label>
-      <input v-model="title" class="input mt-1 w-full" placeholder="Perfect - Ed Sheeran">
+      <input v-model="draft.music.title" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Perfect - Ed Sheeran">
     </div>
-
-    <label class="flex items-center gap-2 text-sm">
-      <input v-model="autoplay" type="checkbox" class="h-4 w-4">
-      Autoplay saat undangan dibuka
-    </label>
-
     <div>
-      <label class="text-xs font-medium text-samasta-muted">Link live streaming (opsional)</label>
-      <input v-model="streamingUrl" class="input mt-1 w-full" placeholder="https://youtube.com/live/...">
+      <label class="text-xs font-medium text-samasta-muted">URL audio (opsional)</label>
+      <input v-model="draft.music.url" type="url" :class="EDITOR_INPUT_CLASS" placeholder="https://.../lagu.mp3">
     </div>
+    <label class="flex items-center gap-2 rounded-2xl border border-samasta-burgundy/10 px-3 py-3 text-sm">
+      <input v-model="draft.music.autoplay" type="checkbox" class="rounded border-samasta-burgundy/30">
+      Sarankan autoplay setelah tamu membuka undangan
+    </label>
   </div>
 </template>

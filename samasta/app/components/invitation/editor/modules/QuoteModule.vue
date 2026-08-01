@@ -1,51 +1,25 @@
 <script setup lang="ts">
-import type { Invitation } from '~/types'
+import type { InvitationEditorDraft } from '~/utils/invitationEditor'
+import { EDITOR_INPUT_CLASS } from '~/utils/invitationEditor'
 
-const props = defineProps<{
-  invitation: Invitation
+defineProps<{
+  draft: InvitationEditorDraft
 }>()
-
-const greeting = ref('')
-const quote = ref('')
-
-watch(
-  () => [props.invitation.greeting, props.invitation.quote] as const,
-  ([nextGreeting, nextQuote]) => {
-    greeting.value = nextGreeting ?? ''
-    quote.value = nextQuote ?? ''
-  },
-  { immediate: true },
-)
-
-function getPayload() {
-  return {
-    greeting: greeting.value.trim() || null,
-    quote: quote.value.trim() || null,
-  }
-}
-
-defineExpose({ getPayload })
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div>
-      <label class="text-xs font-medium text-samasta-muted">Sambutan</label>
-      <textarea
-        v-model="greeting"
-        class="input mt-1 w-full"
-        rows="4"
-        placeholder="Dengan memohon rahmat Tuhan..."
-      />
-    </div>
-    <div>
-      <label class="text-xs font-medium text-samasta-muted">Kutipan</label>
-      <textarea
-        v-model="quote"
-        class="input mt-1 w-full"
-        rows="3"
-        placeholder="Dan di antara tanda-tanda kekuasaan-Nya..."
-      />
+  <div class="space-y-3">
+    <label class="text-xs font-medium text-samasta-muted">Kutipan spesial</label>
+    <textarea
+      v-model="draft.quote"
+      rows="4"
+      :class="EDITOR_INPUT_CLASS"
+      placeholder="Dan di antara tanda-tanda kekuasaan-Nya..."
+    />
+    <div class="rounded-2xl bg-samasta-cream p-4 text-center">
+      <p class="font-display text-lg italic text-samasta-burgundy">
+        “{{ draft.quote || 'Pratinjau quote akan muncul di sini' }}”
+      </p>
     </div>
   </div>
 </template>

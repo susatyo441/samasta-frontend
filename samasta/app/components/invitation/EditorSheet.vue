@@ -1,20 +1,15 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
+import { useMutation, useQueryCache } from '@pinia/colada'
+import { toast } from 'vue-sonner'
 import type { Invitation } from '~/types'
 import { EDITOR_MODULE_TITLES } from '~/constants/editorModules'
-import { useInvitationMutations } from '~/composables/useInvitationMutations'
+import { INVITATION_QUERY_KEYS, updateInvitation } from '~/queries/invitations'
+import {
+  buildModulePayload,
+  createInvitationDraft,
+  type InvitationEditorDraft,
+} from '~/utils/invitationEditor'
 import { handleMutationError } from '~/utils/handleMutationError'
-import { toast } from 'vue-sonner'
-import EventsModule from '~/components/invitation/editor/modules/EventsModule.vue'
-import FallbackModule from '~/components/invitation/editor/modules/FallbackModule.vue'
-import GalleryModule from '~/components/invitation/editor/modules/GalleryModule.vue'
-import GiftModule from '~/components/invitation/editor/modules/GiftModule.vue'
-import HostsModule from '~/components/invitation/editor/modules/HostsModule.vue'
-import MessagesModule from '~/components/invitation/editor/modules/MessagesModule.vue'
-import MusicModule from '~/components/invitation/editor/modules/MusicModule.vue'
-import QuoteModule from '~/components/invitation/editor/modules/QuoteModule.vue'
-import ShareModule from '~/components/invitation/editor/modules/ShareModule.vue'
-import StoryModule from '~/components/invitation/editor/modules/StoryModule.vue'
 
 const props = defineProps<{
   moduleId: string | null
@@ -25,24 +20,41 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const moduleComponents: Record<string, Component> = {
-  hosts: HostsModule,
-  events: EventsModule,
-  gallery: GalleryModule,
-  music: MusicModule,
-  messages: MessagesModule,
-  gift: GiftModule,
-  story: StoryModule,
-  quote: QuoteModule,
-  share: ShareModule,
-}
+const draft = ref<InvitationEditorDraft | null>(null)
+const queryCache = useQueryCache()
 
-const moduleRef = ref<{ getPayload?: () => Record<string, unknown> } | null>(null)
-const saving = ref(false)
+const readOnlyModules = new Set(['messages', 'share', 'guestbook', 'ig-story', 'event-planner'])
+
+watch(
+  () => [props.moduleId, props.invitation] as const,
+  ([moduleId, invitation]) => {
+    if (moduleId && invitation) {
+      draft.value = createInvitationDraft(invitation)
+    } else {
+      draft.value = null
+    }
+  },
+  { immediate: true },
+)
+
+const moduleComponents: Record<string, ReturnType<typeof resolveComponent>> = {
+  theme: resolveComponent('InvitationEditorModulesThemeModule'),
+  hosts: resolveComponent('InvitationEditorModulesHostsModule'),
+  events: resolveComponent('InvitationEditorModulesEventsModule'),
+  gallery: resolveComponent('InvitationEditorModulesGalleryModule'),
+  music: resolveComponent('InvitationEditorModulesMusicModule'),
+  messages: resolveComponent('InvitationEditorModulesMessagesModule'),
+  gift: resolveComponent('InvitationEditorModulesGiftModule'),
+  streaming: resolveComponent('InvitationEditorModulesStreamingModule'),
+  story: resolveComponent('InvitationEditorModulesStoryModule'),
+  quote: resolveComponent('InvitationEditorModulesQuoteModule'),
+  settings: resolveComponent('InvitationEditorModulesSettingsModule'),
+  share: resolveComponent('InvitationEditorModulesShareModule'),
+}
 
 const activeModule = computed(() => {
   if (!props.moduleId) return null
-  return moduleComponents[props.moduleId] ?? FallbackModule
+  return moduleComponents[props.moduleId] || resolveComponent('InvitationEditorModulesFallbackModule')
 })
 
 const moduleTitle = computed(() => {
@@ -50,30 +62,34 @@ const moduleTitle = computed(() => {
   return EDITOR_MODULE_TITLES[props.moduleId] || 'Edit'
 })
 
-const selfManagedModules = new Set(['share', 'messages', 'gallery'])
-const showSave = computed(() => props.moduleId && !selfManagedModules.has(props.moduleId))
+const canSave = computed(() => {
+  if (!props.moduleId) return false
+  if (readOnlyModules.has(props.moduleId)) return false
+  if (props.moduleId === 'gallery') return false
+  return Boolean(buildModulePayload(props.moduleId, draft.value as InvitationEditorDraft))
+})
 
-const { update } = useInvitationMutations(() => props.invitation?.id ?? '')
-
-async function save() {
-  if (!props.invitation || !moduleRef.value?.getPayload) return
-
-  saving.value = true
-  try {
-    await update(moduleRef.value.getPayload())
-    toast.success('Perubahan disimpan.')
+const { mutate: saveModule, isLoading: saving } = useMutation({
+  mutation: async () => {
+    if (!props.invitation || !props.moduleId || !draft.value) {
+      throw new Error('Draft tidak siap')
+    }
+    const payload = buildModulePayload(props.moduleId, draft.value)
+    if (!payload) throw new Error('Modul ini tidak memiliki form simpan')
+    return updateInvitation(props.invitation.id, payload)
+  },
+  onSuccess: async () => {
+    toast.success('Perubahan disimpan')
+    await queryCache.invalidateQueries({ key: INVITATION_QUERY_KEYS.root })
     emit('close')
-  } catch (err) {
-    handleMutationError(err)
-  } finally {
-    saving.value = false
-  }
-}
+  },
+  onError: (err) => handleMutationError(err),
+})
 </script>
 
 <template>
   <div
-    v-if="moduleId && invitation"
+    v-if="moduleId && invitation && draft"
     class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
     @click.self="emit('close')"
   >
@@ -84,13 +100,7 @@ async function save() {
             {{ moduleTitle }}
           </h3>
           <p class="mt-1 text-xs text-samasta-muted">
-            {{
-              showSave
-                ? 'Ubah konten lalu simpan.'
-                : selfManagedModules.has(moduleId)
-                  ? 'Perubahan langsung tersimpan dari modul ini.'
-                  : 'Pratinjau modul.'
-            }}
+            Sesuaikan konten undangan agar tampil cocok dengan tema yang dipilih.
           </p>
         </div>
         <button
@@ -104,20 +114,24 @@ async function save() {
 
       <component
         :is="activeModule"
-        ref="moduleRef"
         :invitation="invitation"
+        :draft="draft"
         :module-id="moduleId"
+        :event-type="invitation.eventType"
       />
 
       <button
-        v-if="showSave"
+        v-if="canSave"
         type="button"
         class="btn-primary mt-5 w-full"
         :disabled="saving"
-        @click="save"
+        @click="() => saveModule()"
       >
         {{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}
       </button>
+      <p v-else-if="moduleId === 'gallery'" class="mt-5 text-center text-xs text-samasta-muted">
+        Unggah media di atas langsung tersimpan. Tutup jika sudah selesai.
+      </p>
     </div>
   </div>
 </template>

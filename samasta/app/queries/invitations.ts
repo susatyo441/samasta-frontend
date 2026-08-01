@@ -4,7 +4,9 @@ import type {
   GuestPayload,
   Invitation,
   InvitationGuest,
+  InvitationMedia,
   InvitationPlan,
+  InvitationTheme,
   InvitationTransaction,
   InvitationUpdatePayload,
   PaginatedInvitations,
@@ -19,6 +21,8 @@ export const INVITATION_QUERY_KEYS = {
   bySlug: (slug: string) => [...INVITATION_QUERY_KEYS.root, 'by-slug', slug] as const,
   transactions: () => [...INVITATION_QUERY_KEYS.root, 'transactions'] as const,
   editorModules: () => [...INVITATION_QUERY_KEYS.root, 'editor-modules'] as const,
+  catalogThemes: (eventType?: string) =>
+    [...INVITATION_QUERY_KEYS.root, 'catalog-themes', eventType || 'all'] as const,
   plans: () => [...INVITATION_QUERY_KEYS.root, 'plans'] as const,
   guests: (invitationId: string | number) =>
     [...INVITATION_QUERY_KEYS.byId(invitationId), 'guests'] as const,
@@ -59,7 +63,9 @@ export function invitationTransactionsQueryOptions() {
     key: INVITATION_QUERY_KEYS.transactions(),
     query: () => {
       const $larafetch = useSanctumClient()
-      return $larafetch<{ data: InvitationTransaction[] }>('/api/invitation-transactions')
+      return $larafetch<{ data: InvitationTransaction[] } | InvitationTransaction[]>(
+        '/api/invitation-transactions',
+      )
     },
   }
 }
@@ -70,6 +76,17 @@ export function editorModulesQueryOptions() {
     query: () => {
       const $larafetch = useSanctumClient()
       return $larafetch<{ editorModules: EditorModule[] }>('/api/invitations/meta/editor-modules')
+    },
+  }
+}
+
+export function catalogThemesQueryOptions(eventType?: string) {
+  return {
+    key: INVITATION_QUERY_KEYS.catalogThemes(eventType),
+    query: () => {
+      const $larafetch = useSanctumClient()
+      const qs = eventType ? `?eventType=${encodeURIComponent(eventType)}` : ''
+      return $larafetch<{ data: InvitationTheme[] }>(`/api/invitations/meta/themes${qs}`)
     },
   }
 }
@@ -102,7 +119,10 @@ export async function createInvitation(payload: CreateInvitationPayload) {
   })
 }
 
-export async function updateInvitation(id: string | number, payload: InvitationUpdatePayload) {
+export async function updateInvitation(
+  id: string | number,
+  payload: InvitationUpdatePayload | Record<string, unknown>,
+) {
   const $larafetch = useSanctumClient()
   return $larafetch<{ data: Invitation }>(`/api/invitations/${id}`, {
     method: 'PUT',
@@ -122,7 +142,7 @@ export async function uploadInvitationMedia(
   body.append('type', type)
   if (label) body.append('label', label)
 
-  return $larafetch<{ data: Record<string, unknown> }>(`/api/invitations/${invitationId}/media`, {
+  return $larafetch<{ data: InvitationMedia }>(`/api/invitations/${invitationId}/media`, {
     method: 'POST',
     body,
   })
@@ -191,10 +211,10 @@ export async function importInvitationGuests(invitationId: string | number, file
   const body = new FormData()
   body.append('file', file)
 
-  return $larafetch<{ message: string; data: { imported: number; skipped: number; errors: Record<string, string> } }>(
-    `/api/invitations/${invitationId}/guests/import`,
-    { method: 'POST', body },
-  )
+  return $larafetch<{
+    message: string
+    data: { imported: number; skipped: number; errors: Record<string, string> }
+  }>(`/api/invitations/${invitationId}/guests/import`, { method: 'POST', body })
 }
 
 export function downloadGuestImportTemplate() {

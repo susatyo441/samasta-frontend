@@ -1,78 +1,56 @@
 <script setup lang="ts">
-import type { Invitation } from '~/types'
+import type { InvitationEditorDraft } from '~/utils/invitationEditor'
+import { EDITOR_INPUT_CLASS } from '~/utils/invitationEditor'
 
 const props = defineProps<{
-  invitation: Invitation
+  draft: InvitationEditorDraft
 }>()
 
-type EventRow = NonNullable<Invitation['events']>[number]
-
-const events = ref<EventRow[]>([])
-
-const emptyEvent = (): EventRow => ({
-  name: '',
-  date: '',
-  startTime: '',
-  endTime: '',
-  venueName: '',
-  venueAddress: '',
-  mapsUrl: '',
-})
-
-watch(
-  () => props.invitation.events,
-  (value) => {
-    events.value = structuredClone(value?.length ? value : [emptyEvent()])
-  },
-  { immediate: true },
-)
-
 function addEvent() {
-  events.value.push(emptyEvent())
+  props.draft.events.push({
+    name: '',
+    date: '',
+    startTime: '',
+    endTime: '',
+    venueName: '',
+    venueAddress: '',
+    mapsUrl: '',
+  })
 }
 
 function removeEvent(index: number) {
-  events.value.splice(index, 1)
-  if (!events.value.length) events.value.push(emptyEvent())
+  props.draft.events.splice(index, 1)
+  if (!props.draft.events.length) addEvent()
 }
-
-function getPayload() {
-  return {
-    events: events.value.filter((event) => event.name.trim() && event.date),
-  }
-}
-
-defineExpose({ getPayload })
 </script>
 
 <template>
   <div class="space-y-3">
-    <div
-      v-for="(event, idx) in events"
-      :key="idx"
-      class="space-y-2 rounded-2xl border border-samasta-burgundy/10 bg-samasta-cream/70 p-4"
-    >
-      <input v-model="event.name" class="input w-full" placeholder="Nama acara">
-      <input v-model="event.date" type="date" class="input w-full">
-      <div class="grid grid-cols-2 gap-2">
-        <input v-model="event.startTime" type="time" class="input w-full" placeholder="Mulai">
-        <input v-model="event.endTime" type="time" class="input w-full" placeholder="Selesai">
-      </div>
-      <input v-model="event.venueName" class="input w-full" placeholder="Nama venue">
-      <textarea v-model="event.venueAddress" class="input w-full" rows="2" placeholder="Alamat venue" />
-      <input v-model="event.mapsUrl" class="input w-full" placeholder="Link Google Maps">
-      <button
-        v-if="events.length > 1"
-        type="button"
-        class="text-xs font-medium text-red-600"
-        @click="removeEvent(idx)"
-      >
-        Hapus acara
+    <div class="flex items-center justify-between">
+      <p class="text-sm font-semibold text-samasta-burgundy">Detail acara</p>
+      <button type="button" class="text-xs font-semibold text-samasta-burgundy" @click="addEvent">
+        + Tambah acara
       </button>
     </div>
 
-    <button type="button" class="btn-secondary w-full" @click="addEvent">
-      + Tambah Acara
-    </button>
+    <div
+      v-for="(event, idx) in draft.events"
+      :key="idx"
+      class="space-y-2 rounded-2xl border border-samasta-burgundy/10 bg-samasta-cream/60 p-4"
+    >
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-medium text-samasta-muted">Acara {{ idx + 1 }}</p>
+        <button type="button" class="text-[11px] text-rose-600" @click="removeEvent(idx)">Hapus</button>
+      </div>
+      <input v-model="event.name" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Akad / Resepsi">
+      <input v-model="event.date" type="date" :class="EDITOR_INPUT_CLASS">
+      <div class="grid grid-cols-2 gap-2">
+        <input v-model="event.startTime" type="time" :class="EDITOR_INPUT_CLASS">
+        <input v-model="event.endTime" type="time" :class="EDITOR_INPUT_CLASS">
+      </div>
+      <input v-model="event.venueName" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Nama venue">
+      <input v-model="event.venueAddress" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Alamat">
+      <input v-model="event.mapsUrl" type="url" :class="EDITOR_INPUT_CLASS" placeholder="https://maps.google.com/...">
+    </div>
   </div>
 </template>

@@ -7,14 +7,6 @@ export interface InvitationGift {
   wishlistItems?: Array<{ name: string; price: number }>
 }
 
-export interface InvitationMediaItem {
-  id: string
-  type: string
-  label?: string
-  url?: string
-  path?: string
-}
-
 export interface InvitationGuest {
   id: string
   name: string
@@ -24,6 +16,17 @@ export interface InvitationGuest {
   rsvp?: string
   message?: string
 }
+
+export interface InvitationMedia {
+  id: string
+  type: string
+  label?: string
+  path?: string
+  url?: string
+}
+
+/** @deprecated Prefer InvitationMedia */
+export type InvitationMediaItem = InvitationMedia
 
 export interface Invitation {
   id: number
@@ -49,9 +52,9 @@ export interface Invitation {
     venueAddress?: string
     mapsUrl?: string
   }>
-  gallery?: InvitationMediaItem[]
-  coverImage?: InvitationMediaItem | null
-  music?: { title?: string; autoplay?: boolean }
+  gallery?: InvitationMedia[]
+  coverImage?: InvitationMedia | null
+  music?: { title?: string; autoplay?: boolean; url?: string }
   streamingUrl?: string
   rsvpDeadline?: string | null
   gift?: InvitationGift
