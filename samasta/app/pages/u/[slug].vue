@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
+import { resolveTheme } from '~/themes/registry'
+
 const route = useRoute()
 const slug = computed(() => String(route.params.slug))
 const { invitation, query } = usePublicInvitation(slug)
 const isLoading = useQueryLoading(query)
 
-const opened = ref(false)
+const ThemeView = shallowRef<Component | null>(null)
 
 const loadError = computed(() => {
   if (query.error.value) return 'Undangan tidak ditemukan atau belum dipublikasikan.'
@@ -12,6 +15,20 @@ const loadError = computed(() => {
 })
 
 const showNotFound = computed(() => !isLoading.value && (Boolean(loadError.value) || !invitation.value))
+
+watch(
+  invitation,
+  async (value) => {
+    if (!value) {
+      ThemeView.value = null
+      return
+    }
+    const { loader } = resolveTheme(value.themeId)
+    const mod = await loader()
+    ThemeView.value = markRaw(mod.default)
+  },
+  { immediate: true },
+)
 
 useSeoMeta({
   title: computed(() => (invitation.value ? `${invitation.value.title} – Samasta` : 'Undangan tidak ditemukan')),
@@ -31,8 +48,9 @@ useSeoMeta({
     </div>
   </div>
 
-  <div v-else-if="invitation" class="min-h-screen bg-samasta-cream text-samasta-charcoal">
-    <InvitationPublicCover v-if="!opened" :invitation="invitation" @open="opened = true" />
-    <InvitationPublicContent v-else :invitation="invitation" />
-  </div>
+  <component
+    :is="ThemeView"
+    v-else-if="ThemeView && invitation"
+    :invitation="invitation"
+  />
 </template>

@@ -1,22 +1,56 @@
 <script setup lang="ts">
-import type { Invitation } from '~/types'
+import type { InvitationEditorDraft } from '~/utils/invitationEditor'
+import { EDITOR_INPUT_CLASS } from '~/utils/invitationEditor'
 
-defineProps<{
-  invitation: Invitation
+const props = defineProps<{
+  draft: InvitationEditorDraft
 }>()
+
+function addEvent() {
+  props.draft.events.push({
+    name: '',
+    date: '',
+    startTime: '',
+    endTime: '',
+    venueName: '',
+    venueAddress: '',
+    mapsUrl: '',
+  })
+}
+
+function removeEvent(index: number) {
+  props.draft.events.splice(index, 1)
+  if (!props.draft.events.length) addEvent()
+}
 </script>
 
 <template>
   <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <p class="text-sm font-semibold text-samasta-burgundy">Detail acara</p>
+      <button type="button" class="text-xs font-semibold text-samasta-burgundy" @click="addEvent">
+        + Tambah acara
+      </button>
+    </div>
+
     <div
-      v-for="(event, idx) in invitation.events"
+      v-for="(event, idx) in draft.events"
       :key="idx"
-      class="rounded-2xl border border-samasta-burgundy/10 bg-samasta-cream/70 p-4"
+      class="space-y-2 rounded-2xl border border-samasta-burgundy/10 bg-samasta-cream/60 p-4"
     >
-      <p class="font-medium text-samasta-burgundy">{{ event.name }}</p>
-      <p class="mt-1 text-sm text-samasta-muted">{{ event.date }} · {{ event.startTime }}–{{ event.endTime }}</p>
-      <p class="mt-2 text-sm">{{ event.venueName }}</p>
-      <p class="text-xs text-samasta-muted">{{ event.venueAddress }}</p>
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-medium text-samasta-muted">Acara {{ idx + 1 }}</p>
+        <button type="button" class="text-[11px] text-rose-600" @click="removeEvent(idx)">Hapus</button>
+      </div>
+      <input v-model="event.name" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Akad / Resepsi">
+      <input v-model="event.date" type="date" :class="EDITOR_INPUT_CLASS">
+      <div class="grid grid-cols-2 gap-2">
+        <input v-model="event.startTime" type="time" :class="EDITOR_INPUT_CLASS">
+        <input v-model="event.endTime" type="time" :class="EDITOR_INPUT_CLASS">
+      </div>
+      <input v-model="event.venueName" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Nama venue">
+      <input v-model="event.venueAddress" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Alamat">
+      <input v-model="event.mapsUrl" type="url" :class="EDITOR_INPUT_CLASS" placeholder="https://maps.google.com/...">
     </div>
   </div>
 </template>

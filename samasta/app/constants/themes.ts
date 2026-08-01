@@ -5,6 +5,7 @@ export const INVITATION_EVENT_TYPES = [
 ] as const
 
 export const THEME_COVER_GRADIENTS = [
+  'from-[#f7f1e8] via-[#efe4d2] to-[#e8d5b5]',
   'from-pink-100 to-amber-100',
   'from-sky-100 to-indigo-50',
   'from-violet-100 to-fuchsia-50',

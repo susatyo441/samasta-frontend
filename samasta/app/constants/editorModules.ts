@@ -2,7 +2,7 @@ export const EDITOR_MODULE_TITLES: Record<string, string> = {
   hosts: 'Edit Host / Pengantin',
   theme: 'Pilih Tema',
   events: 'Detail Acara',
-  gallery: 'Galeri',
+  gallery: 'Galeri & Cover',
   music: 'Musik Latar',
   messages: 'Ucapan Tamu',
   gift: 'Pengaturan Kado',

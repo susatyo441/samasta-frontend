@@ -16,6 +16,14 @@ export interface InvitationGuest {
   message?: string
 }
 
+export interface InvitationMedia {
+  id: string
+  type: string
+  label?: string
+  path?: string
+  url?: string
+}
+
 export interface Invitation {
   id: number
   userId: number
@@ -40,8 +48,9 @@ export interface Invitation {
     venueAddress?: string
     mapsUrl?: string
   }>
-  gallery?: Array<{ id: string; type: string; label?: string }>
-  music?: { title?: string; autoplay?: boolean }
+  gallery?: InvitationMedia[]
+  coverImage?: InvitationMedia | null
+  music?: { title?: string; autoplay?: boolean; url?: string }
   streamingUrl?: string
   rsvpDeadline?: string | null
   gift?: InvitationGift

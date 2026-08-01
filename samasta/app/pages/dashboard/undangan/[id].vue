@@ -4,12 +4,17 @@ definePageMeta({
   middleware: ['sanctum:auth'],
 })
 
+import { useMutation, useQueryCache } from '@pinia/colada'
+import { toast } from 'vue-sonner'
 import { buildInvitationUrl } from '~/utils/invitationUrl'
+import { INVITATION_QUERY_KEYS, updateInvitation } from '~/queries/invitations'
+import { handleMutationError } from '~/utils/handleMutationError'
 
 const route = useRoute()
 const { user } = useAuth()
 const { invitation } = useInvitationById(computed(() => String(route.params.id)))
 const { editorModules } = useInvitations()
+const queryCache = useQueryCache()
 
 useSeoMeta({
   title: computed(() => (invitation.value ? `Edit ${invitation.value.title}` : 'Edit Undangan')),
@@ -44,6 +49,27 @@ async function copyLink() {
     copied.value = false
   }
 }
+
+const { mutate: toggleStatus, isLoading: togglingStatus } = useMutation({
+  mutation: async (nextActive: boolean) => {
+    if (!invitation.value) throw new Error('Undangan tidak ditemukan')
+    return updateInvitation(invitation.value.id, {
+      status: nextActive ? 'active' : 'draft',
+    })
+  },
+  onSuccess: async () => {
+    toast.success(active.value ? 'Undangan diaktifkan' : 'Undangan dinonaktifkan')
+    await queryCache.invalidateQueries({ key: INVITATION_QUERY_KEYS.root })
+  },
+  onError: (err) => {
+    active.value = invitation.value?.status === 'active'
+    handleMutationError(err)
+  },
+})
+
+function onActiveChange() {
+  toggleStatus(active.value)
+}
 </script>
 
 <template>
@@ -75,6 +101,9 @@ async function copyLink() {
               <h2 class="truncate font-display text-2xl font-semibold sm:text-3xl">
                 {{ invitation.title }}
               </h2>
+              <p v-if="invitation.themeId" class="mt-1 text-xs text-white/70">
+                Tema: {{ invitation.themeId }}
+              </p>
               <div class="mt-2 flex items-center gap-2">
                 <NuxtLink
                   :to="invitation.publicUrl"
@@ -95,7 +124,13 @@ async function copyLink() {
 
             <label class="inline-flex shrink-0 items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide">
               {{ active ? 'Aktif' : 'Off' }}
-              <input v-model="active" type="checkbox" class="h-4 w-4 accent-green-400">
+              <input
+                v-model="active"
+                type="checkbox"
+                class="h-4 w-4 accent-green-400"
+                :disabled="togglingStatus"
+                @change="onActiveChange"
+              >
             </label>
           </div>
 
@@ -110,8 +145,9 @@ async function copyLink() {
           <button
             type="button"
             class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-samasta-burgundy"
+            @click="selectedModule = 'theme'"
           >
-            <span aria-hidden="true">＋</span> Tambah Pengelola
+            <span aria-hidden="true">◐</span> Pilih / Ganti Tema
           </button>
         </section>
 
