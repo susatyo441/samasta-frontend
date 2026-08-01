@@ -92,7 +92,9 @@ Resolve order:
 
 1. Prefer `componentKey` from catalog when available  
 2. Else use `invitation.themeId`  
-3. Else `defaultThemeKey` (e.g. `aurora-pastel`)
+3. Else `defaultThemeKey` (`confetti-pop`)
+
+Implemented Vue packages today: `confetti-pop`, `aurora-pastel`.
 
 ### Endpoints
 

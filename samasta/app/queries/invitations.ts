@@ -133,6 +133,17 @@ export function catalogThemesQueryOptions(eventType?: string) {
   }
 }
 
+export function publicCatalogThemesQueryOptions(eventType?: string) {
+  return {
+    key: [...INVITATION_QUERY_KEYS.root, 'public-catalog-themes', eventType || 'all'] as const,
+    query: () => {
+      const $larafetch = useSanctumClient()
+      const qs = eventType ? `?eventType=${encodeURIComponent(eventType)}` : ''
+      return $larafetch<{ data: InvitationTheme[] }>(`/api/public/invitations/meta/themes${qs}`)
+    },
+  }
+}
+
 export function invitationPlansQueryOptions() {
   return {
     key: INVITATION_QUERY_KEYS.plans(),

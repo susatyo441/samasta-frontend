@@ -2,6 +2,7 @@ import { useQueryCache } from '@pinia/colada'
 import { INVITATION_QUERY_KEYS, submitPublicRsvp, submitPublicWish } from '~/queries/invitations'
 import type { Invitation, InvitationGuest } from '~/types'
 import { extractErrorMessage } from '~/utils/handleMutationError'
+import { STATIC_THEME_DEMO_KEY } from '~/utils/staticThemeDemo'
 
 type PublicInvitationPayload = { data: Invitation }
 
@@ -31,6 +32,7 @@ function mergeGuestIntoInvitation(invitation: Invitation, guest: InvitationGuest
 export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
   const route = useRoute()
   const queryCache = useQueryCache()
+  const isStaticDemo = inject(STATIC_THEME_DEMO_KEY, false)
 
   const guestId = computed(() => {
     const raw = route.query.guestId ?? route.query.guest
@@ -44,6 +46,10 @@ export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
   const wishSubmitting = ref(false)
   const wishSuccess = ref(false)
   const wishError = ref('')
+
+  async function simulateDemoSubmit() {
+    await new Promise((resolve) => setTimeout(resolve, 350))
+  }
 
   function patchInvitationCache(guest: InvitationGuest) {
     const resolvedSlug = toValue(slug)
@@ -73,6 +79,12 @@ export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
     rsvpError.value = ''
 
     try {
+      if (isStaticDemo) {
+        await simulateDemoSubmit()
+        rsvpSuccess.value = true
+        return true
+      }
+
       const result = await submitPublicRsvp(resolvedSlug, {
         name: payload.name,
         rsvp: payload.status,
@@ -98,6 +110,12 @@ export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
     wishError.value = ''
 
     try {
+      if (isStaticDemo) {
+        await simulateDemoSubmit()
+        wishSuccess.value = true
+        return true
+      }
+
       const result = await submitPublicWish(resolvedSlug, {
         name: payload.name,
         message: payload.message,
