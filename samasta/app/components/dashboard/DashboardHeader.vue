@@ -4,13 +4,13 @@ defineProps<{
   subtitle?: string
 }>()
 
-const { user, logout } = useAuth()
+const { user } = useAuth()
+const { signOut } = useLogout()
 const menuOpen = ref(false)
 
 async function onLogout() {
   menuOpen.value = false
-  logout()
-  await navigateTo('/login')
+  await signOut()
 }
 
 function closeMenu() {

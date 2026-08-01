@@ -1,13 +1,20 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth',
+  middleware: ['sanctum:auth'],
+})
+
+import { buildInvitationUrl } from '~/utils/invitationUrl'
+
+useSeoMeta({
+  title: computed(() => (invitation.value ? `Edit ${invitation.value.title}` : 'Edit Undangan')),
 })
 
 const route = useRoute()
-const { getInvitationById, editorModules, user } = useAuth()
+const { user } = useAuth()
+const { invitation } = useInvitationById(computed(() => String(route.params.id)))
+const { editorModules } = useInvitations()
 
-const invitation = computed(() => getInvitationById(String(route.params.id)))
 const active = ref(true)
 const selectedModule = ref<string | null>(null)
 const copied = ref(false)
@@ -22,10 +29,7 @@ watch(
 
 const inviteLink = computed(() => {
   if (!invitation.value) return ''
-  if (import.meta.client) {
-    return `${window.location.origin}${invitation.value.publicUrl}`
-  }
-  return invitation.value.publicUrl
+  return buildInvitationUrl(invitation.value.publicUrl)
 })
 
 async function copyLink() {
@@ -40,10 +44,6 @@ async function copyLink() {
     copied.value = false
   }
 }
-
-useSeoMeta({
-  title: computed(() => (invitation.value ? `Edit ${invitation.value.title}` : 'Edit Undangan')),
-})
 </script>
 
 <template>
@@ -56,7 +56,6 @@ useSeoMeta({
     </div>
 
     <div v-else class="mx-auto max-w-xl px-3 py-4 sm:px-6 sm:py-6">
-      <!-- Top bar -->
       <div class="mb-3 flex items-center justify-between gap-3">
         <NuxtLink
           to="/dashboard/undangan"
@@ -69,9 +68,7 @@ useSeoMeta({
         </span>
       </div>
 
-      <!-- Main edit panel -->
       <div class="overflow-hidden rounded-2xl border border-samasta-burgundy/10 bg-white shadow-soft">
-        <!-- Status header -->
         <section class="bg-samasta-burgundy px-4 pb-5 pt-5 text-white sm:px-5">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
@@ -98,35 +95,17 @@ useSeoMeta({
 
             <label class="inline-flex shrink-0 items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide">
               {{ active ? 'Aktif' : 'Off' }}
-              <input
-                v-model="active"
-                type="checkbox"
-                class="h-4 w-4 accent-green-400"
-              >
+              <input v-model="active" type="checkbox" class="h-4 w-4 accent-green-400">
             </label>
           </div>
 
-          <!-- Stats -->
-          <div class="mt-5 grid grid-cols-3 gap-2">
-            <div class="rounded-xl bg-white px-2 py-3 text-center text-samasta-charcoal">
-              <p class="font-display text-2xl font-semibold text-samasta-burgundy sm:text-3xl">
-                {{ invitation.stats.guests }}
-              </p>
-              <p class="mt-0.5 text-[10px] text-samasta-muted sm:text-xs">Tamu</p>
-            </div>
-            <div class="rounded-xl bg-white px-2 py-3 text-center text-samasta-charcoal">
-              <p class="font-display text-2xl font-semibold text-samasta-burgundy sm:text-3xl">
-                {{ invitation.stats.attending }}
-              </p>
-              <p class="mt-0.5 text-[10px] text-samasta-muted sm:text-xs">Akan Hadir</p>
-            </div>
-            <div class="rounded-xl bg-white px-2 py-3 text-center text-samasta-charcoal">
-              <p class="font-display text-2xl font-semibold text-samasta-burgundy sm:text-3xl">
-                {{ invitation.stats.messages }}
-              </p>
-              <p class="mt-0.5 text-[10px] text-samasta-muted sm:text-xs">Ucapan</p>
-            </div>
-          </div>
+          <UiStatGrid
+            class="mt-5"
+            variant="header"
+            :guests="invitation.stats?.guests ?? 0"
+            :attending="invitation.stats?.attending ?? 0"
+            :messages="invitation.stats?.messages ?? 0"
+          />
 
           <button
             type="button"
@@ -136,7 +115,6 @@ useSeoMeta({
           </button>
         </section>
 
-        <!-- Body -->
         <section class="space-y-4 bg-[#F7F4F2] px-4 py-5 sm:px-5">
           <p class="text-center text-sm text-samasta-muted">
             Kode Akses Undangan
@@ -153,14 +131,12 @@ useSeoMeta({
             Buka Layar Penerima Tamu
           </button>
 
-          <!-- Feature menus -->
-          <DashboardInviteFeatureGrid
+          <InvitationFeatureGrid
             :event-type="(invitation.eventType as 'wedding' | 'birthday' | 'other')"
             :modules="editorModules"
             @select="selectedModule = $event"
           />
 
-          <!-- Event Planner -->
           <button
             type="button"
             class="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-samasta-burgundy px-4 py-4 text-white"
@@ -184,7 +160,6 @@ useSeoMeta({
       </p>
     </div>
 
-    <!-- Preview side tab -->
     <NuxtLink
       v-if="invitation"
       :to="invitation.publicUrl"
@@ -194,7 +169,7 @@ useSeoMeta({
       Preview
     </NuxtLink>
 
-    <DashboardInviteEditorSheet
+    <InvitationEditorSheet
       :module-id="selectedModule"
       :invitation="invitation"
       @close="selectedModule = null"

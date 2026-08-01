@@ -1,13 +1,13 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth',
+  middleware: ['sanctum:auth'],
 })
 
-const { user, getUserInvitations } = useAuth()
-const invitations = computed(() => getUserInvitations())
-
 useSeoMeta({ title: 'Dashboard – Samasta' })
+
+const { user } = useAuth()
+const { invitations } = useInvitations()
 </script>
 
 <template>
@@ -53,12 +53,7 @@ useSeoMeta({ title: 'Dashboard – Samasta' })
               <div class="min-w-0 flex-1">
                 <p class="truncate font-medium text-samasta-charcoal">{{ invite.title }}</p>
                 <p class="truncate text-xs text-samasta-muted">{{ invite.publicUrl }}</p>
-                <span
-                  class="mt-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase"
-                  :class="invite.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'"
-                >
-                  {{ invite.status }}
-                </span>
+                <UiStatusBadge class="mt-2" :status="invite.status" />
               </div>
             </div>
           </NuxtLink>
