@@ -1,9 +1,16 @@
 import type {
+  CreateInvitationPayload,
   EditorModule,
+  GuestPayload,
   Invitation,
+  InvitationGuest,
+  InvitationPlan,
   InvitationTransaction,
+  InvitationUpdatePayload,
   PaginatedInvitations,
+  PublishInvitationResult,
 } from '~/types'
+import { unwrapResource } from '~/utils/unwrapResource'
 
 export const INVITATION_QUERY_KEYS = {
   root: ['invitations'] as const,
@@ -12,6 +19,9 @@ export const INVITATION_QUERY_KEYS = {
   bySlug: (slug: string) => [...INVITATION_QUERY_KEYS.root, 'by-slug', slug] as const,
   transactions: () => [...INVITATION_QUERY_KEYS.root, 'transactions'] as const,
   editorModules: () => [...INVITATION_QUERY_KEYS.root, 'editor-modules'] as const,
+  plans: () => [...INVITATION_QUERY_KEYS.root, 'plans'] as const,
+  guests: (invitationId: string | number) =>
+    [...INVITATION_QUERY_KEYS.byId(invitationId), 'guests'] as const,
 }
 
 export function invitationListQueryOptions() {
@@ -49,9 +59,7 @@ export function invitationTransactionsQueryOptions() {
     key: INVITATION_QUERY_KEYS.transactions(),
     query: () => {
       const $larafetch = useSanctumClient()
-      return $larafetch<{ data: InvitationTransaction[] } | InvitationTransaction[]>(
-        '/api/invitation-transactions',
-      )
+      return $larafetch<{ data: InvitationTransaction[] }>('/api/invitation-transactions')
     },
   }
 }
@@ -64,4 +72,139 @@ export function editorModulesQueryOptions() {
       return $larafetch<{ editorModules: EditorModule[] }>('/api/invitations/meta/editor-modules')
     },
   }
+}
+
+export function invitationPlansQueryOptions() {
+  return {
+    key: INVITATION_QUERY_KEYS.plans(),
+    query: () => {
+      const $larafetch = useSanctumClient()
+      return $larafetch<{ plans: InvitationPlan[] }>('/api/invitations/meta/plans')
+    },
+  }
+}
+
+export function invitationGuestsQueryOptions(invitationId: string | number) {
+  return {
+    key: INVITATION_QUERY_KEYS.guests(invitationId),
+    query: () => {
+      const $larafetch = useSanctumClient()
+      return $larafetch<{ data: InvitationGuest[] }>(`/api/invitations/${invitationId}/guests`)
+    },
+  }
+}
+
+export async function createInvitation(payload: CreateInvitationPayload) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: Invitation }>('/api/invitations', {
+    method: 'POST',
+    body: payload,
+  })
+}
+
+export async function updateInvitation(id: string | number, payload: InvitationUpdatePayload) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: Invitation }>(`/api/invitations/${id}`, {
+    method: 'PUT',
+    body: payload,
+  })
+}
+
+export async function uploadInvitationMedia(
+  invitationId: string | number,
+  file: File,
+  type: 'cover' | 'gallery',
+  label?: string,
+) {
+  const $larafetch = useSanctumClient()
+  const body = new FormData()
+  body.append('file', file)
+  body.append('type', type)
+  if (label) body.append('label', label)
+
+  return $larafetch<{ data: Record<string, unknown> }>(`/api/invitations/${invitationId}/media`, {
+    method: 'POST',
+    body,
+  })
+}
+
+export async function deleteInvitationMedia(invitationId: string | number, mediaId: string) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ message: string }>(`/api/invitations/${invitationId}/media/${mediaId}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function publishInvitation(invitationId: string | number, planId: string) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: PublishInvitationResult }>(`/api/invitations/${invitationId}/publish`, {
+    method: 'POST',
+    body: { planId },
+  })
+}
+
+export async function fetchPublishStatus(
+  invitationId: string | number,
+  transactionId: string | number,
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: PublishInvitationResult }>(
+    `/api/invitations/${invitationId}/publish/${transactionId}`,
+  )
+}
+
+export async function createInvitationGuest(invitationId: string | number, payload: GuestPayload) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: InvitationGuest }>(`/api/invitations/${invitationId}/guests`, {
+    method: 'POST',
+    body: payload,
+  })
+}
+
+export async function updateInvitationGuest(
+  invitationId: string | number,
+  guestId: string | number,
+  payload: GuestPayload,
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: InvitationGuest }>(
+    `/api/invitations/${invitationId}/guests/${guestId}`,
+    {
+      method: 'PUT',
+      body: payload,
+    },
+  )
+}
+
+export async function deleteInvitationGuest(
+  invitationId: string | number,
+  guestId: string | number,
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ message: string }>(`/api/invitations/${invitationId}/guests/${guestId}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function importInvitationGuests(invitationId: string | number, file: File) {
+  const $larafetch = useSanctumClient()
+  const body = new FormData()
+  body.append('file', file)
+
+  return $larafetch<{ message: string; data: { imported: number; skipped: number; errors: Record<string, string> } }>(
+    `/api/invitations/${invitationId}/guests/import`,
+    { method: 'POST', body },
+  )
+}
+
+export function downloadGuestImportTemplate() {
+  const config = useRuntimeConfig()
+  const base = config.public.sanctum.baseUrl as string
+  return `${base}/api/invitations/guests/import-template`
+}
+
+export function unwrapInvitation<T extends { data: Invitation } | Invitation | null | undefined>(
+  payload: T,
+) {
+  return unwrapResource(payload as { data: Invitation } | Invitation | null | undefined)
 }

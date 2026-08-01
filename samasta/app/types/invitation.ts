@@ -3,7 +3,16 @@ export interface InvitationGift {
   shippingEnabled?: boolean
   wishlistEnabled?: boolean
   bankAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  shippingAddress?: string
   wishlistItems?: Array<{ name: string; price: number }>
+}
+
+export interface InvitationMediaItem {
+  id: string
+  type: string
+  label?: string
+  url?: string
+  path?: string
 }
 
 export interface InvitationGuest {
@@ -40,7 +49,8 @@ export interface Invitation {
     venueAddress?: string
     mapsUrl?: string
   }>
-  gallery?: Array<{ id: string; type: string; label?: string }>
+  gallery?: InvitationMediaItem[]
+  coverImage?: InvitationMediaItem | null
   music?: { title?: string; autoplay?: boolean }
   streamingUrl?: string
   rsvpDeadline?: string | null
@@ -52,13 +62,65 @@ export interface Invitation {
 }
 
 export interface InvitationTransaction {
-  id: string
+  id: number | string
   userId: number
   invitationId: number
+  referenceNumber?: string
   plan: string
   amount: number
   status: string
   paidAt?: string | null
+}
+
+export interface InvitationPlan {
+  id: string
+  name: string
+  amount: number
+  description?: string
+}
+
+export type InvitationUpdatePayload = Partial<
+  Pick<
+    Invitation,
+    | 'title'
+    | 'slug'
+    | 'eventType'
+    | 'status'
+    | 'themeId'
+    | 'coverGradient'
+    | 'hosts'
+    | 'greeting'
+    | 'quote'
+    | 'loveStory'
+    | 'events'
+    | 'music'
+    | 'streamingUrl'
+    | 'rsvpDeadline'
+    | 'gift'
+    | 'settings'
+  >
+>
+
+export interface CreateInvitationPayload {
+  title: string
+  eventType?: string
+  slug?: string
+}
+
+export interface PublishInvitationResult {
+  transaction: InvitationTransaction
+  snapToken: string | null
+  clientKey: string | null
+  invitationStatus: string
+}
+
+export interface GuestPayload {
+  name: string
+  phone?: string
+  group?: string
+  quota?: number
+  rsvp?: string
+  message?: string
 }
 
 export interface EditorModule {

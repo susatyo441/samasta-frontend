@@ -4,12 +4,16 @@ definePageMeta({
   middleware: ['sanctum:auth'],
 })
 
+import { toast } from 'vue-sonner'
 import { buildInvitationUrl } from '~/utils/invitationUrl'
+import { useInvitationMutations } from '~/composables/useInvitationMutations'
+import { handleMutationError } from '~/utils/handleMutationError'
 
 const route = useRoute()
 const { user } = useAuth()
 const { invitation } = useInvitationById(computed(() => String(route.params.id)))
 const { editorModules } = useInvitations()
+const { update } = useInvitationMutations(() => route.params.id)
 
 useSeoMeta({
   title: computed(() => (invitation.value ? `Edit ${invitation.value.title}` : 'Edit Undangan')),
@@ -17,7 +21,17 @@ useSeoMeta({
 
 const active = ref(true)
 const selectedModule = ref<string | null>(null)
+const showPublish = ref(false)
 const copied = ref(false)
+const statusSaving = ref(false)
+
+function onSelectModule(moduleId: string) {
+  if (moduleId === 'rsvp') {
+    navigateTo(`/dashboard/undangan/${route.params.id}/rsvp`)
+    return
+  }
+  selectedModule.value = moduleId
+}
 
 watch(
   invitation,
@@ -32,6 +46,8 @@ const inviteLink = computed(() => {
   return buildInvitationUrl(invitation.value.publicUrl)
 })
 
+const isDraft = computed(() => invitation.value?.status === 'draft')
+
 async function copyLink() {
   if (!inviteLink.value || !import.meta.client) return
   try {
@@ -42,6 +58,24 @@ async function copyLink() {
     }, 1800)
   } catch {
     copied.value = false
+  }
+}
+
+async function toggleStatus() {
+  if (!invitation.value || statusSaving.value) return
+
+  const nextStatus = active.value ? 'active' : 'draft'
+  if (nextStatus === invitation.value.status) return
+
+  statusSaving.value = true
+  try {
+    await update({ status: nextStatus })
+    toast.success(nextStatus === 'active' ? 'Undangan diaktifkan.' : 'Undangan dinonaktifkan.')
+  } catch (err) {
+    active.value = invitation.value.status === 'active'
+    handleMutationError(err)
+  } finally {
+    statusSaving.value = false
   }
 }
 </script>
@@ -95,7 +129,13 @@ async function copyLink() {
 
             <label class="inline-flex shrink-0 items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide">
               {{ active ? 'Aktif' : 'Off' }}
-              <input v-model="active" type="checkbox" class="h-4 w-4 accent-green-400">
+              <input
+                v-model="active"
+                type="checkbox"
+                class="h-4 w-4 accent-green-400"
+                :disabled="statusSaving"
+                @change="toggleStatus"
+              >
             </label>
           </div>
 
@@ -108,10 +148,12 @@ async function copyLink() {
           />
 
           <button
+            v-if="isDraft"
             type="button"
             class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-samasta-burgundy"
+            @click="showPublish = true"
           >
-            <span aria-hidden="true">＋</span> Tambah Pengelola
+            Publikasikan Undangan
           </button>
         </section>
 
@@ -123,35 +165,11 @@ async function copyLink() {
             </span>
           </p>
 
-          <button
-            type="button"
-            class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2A1F22] px-4 py-3.5 text-sm font-semibold text-white"
-          >
-            <span aria-hidden="true">▣</span>
-            Buka Layar Penerima Tamu
-          </button>
-
           <InvitationFeatureGrid
             :event-type="(invitation.eventType as 'wedding' | 'birthday' | 'other')"
             :modules="editorModules"
-            @select="selectedModule = $event"
+            @select="onSelectModule"
           />
-
-          <button
-            type="button"
-            class="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-samasta-burgundy px-4 py-4 text-white"
-            @click="selectedModule = 'event-planner'"
-          >
-            <span
-              class="absolute right-2 top-2 rounded-md bg-samasta-sage px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white"
-            >
-              New Feature | Trial
-            </span>
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-            </svg>
-            <span class="font-semibold">Event Planner</span>
-          </button>
         </section>
       </div>
 
@@ -173,6 +191,13 @@ async function copyLink() {
       :module-id="selectedModule"
       :invitation="invitation"
       @close="selectedModule = null"
+    />
+
+    <InvitationPublishSheet
+      v-if="showPublish && invitation"
+      :invitation="invitation"
+      @close="showPublish = false"
+      @published="showPublish = false"
     />
   </div>
 </template>

@@ -6,7 +6,13 @@ definePageMeta({
 
 useSeoMeta({ title: 'Undangan – Samasta' })
 
+const router = useRouter()
 const { invitations } = useInvitations()
+const showCreate = ref(false)
+
+function onCreated(id: number) {
+  router.push(`/dashboard/undangan/${id}`)
+}
 </script>
 
 <template>
@@ -14,7 +20,9 @@ const { invitations } = useInvitations()
     <DashboardHeader title="Undangan" subtitle="Kelola semua undangan digitalmu" />
 
     <div class="space-y-4 px-4 py-5 sm:px-6">
-      <button type="button" class="btn-primary w-full sm:w-auto">+ Buat Undangan Baru</button>
+      <button type="button" class="btn-primary w-full sm:w-auto" @click="showCreate = true">
+        + Buat Undangan Baru
+      </button>
 
       <div class="grid gap-3 sm:grid-cols-2">
         <InvitationCard
@@ -24,5 +32,11 @@ const { invitations } = useInvitations()
         />
       </div>
     </div>
+
+    <InvitationCreateInvitationSheet
+      v-if="showCreate"
+      @close="showCreate = false"
+      @created="onCreated"
+    />
   </div>
 </template>
