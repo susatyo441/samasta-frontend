@@ -45,7 +45,6 @@ const moduleComponents: Record<string, ReturnType<typeof resolveComponent>> = {
   music: resolveComponent('InvitationEditorModulesMusicModule'),
   messages: resolveComponent('InvitationEditorModulesMessagesModule'),
   gift: resolveComponent('InvitationEditorModulesGiftModule'),
-  rsvp: resolveComponent('InvitationEditorModulesRsvpModule'),
   streaming: resolveComponent('InvitationEditorModulesStreamingModule'),
   story: resolveComponent('InvitationEditorModulesStoryModule'),
   quote: resolveComponent('InvitationEditorModulesQuoteModule'),

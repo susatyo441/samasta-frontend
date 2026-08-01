@@ -43,4 +43,8 @@
   .dash-card {
     @apply rounded-2xl border border-white/70 bg-white/90 p-4 shadow-sm backdrop-blur-sm sm:p-5;
   }
+
+  .input {
+    @apply rounded-2xl border border-samasta-burgundy/15 bg-white px-4 py-3 text-sm outline-none ring-samasta-burgundy/30 focus:ring-2;
+  }
 }

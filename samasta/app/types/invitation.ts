@@ -3,6 +3,7 @@ export interface InvitationGift {
   shippingEnabled?: boolean
   wishlistEnabled?: boolean
   bankAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  shippingAddress?: string
   wishlistItems?: Array<{ name: string; price: number }>
 }
 
@@ -23,6 +24,9 @@ export interface InvitationMedia {
   path?: string
   url?: string
 }
+
+/** @deprecated Prefer InvitationMedia */
+export type InvitationMediaItem = InvitationMedia
 
 export interface Invitation {
   id: number
@@ -61,13 +65,78 @@ export interface Invitation {
 }
 
 export interface InvitationTransaction {
-  id: string
+  id: number | string
   userId: number
   invitationId: number
+  referenceNumber?: string
   plan: string
   amount: number
   status: string
   paidAt?: string | null
+}
+
+export interface InvitationPlan {
+  id: string
+  name: string
+  amount: number
+  description?: string
+}
+
+export type InvitationUpdatePayload = Partial<
+  Pick<
+    Invitation,
+    | 'title'
+    | 'slug'
+    | 'eventType'
+    | 'status'
+    | 'themeId'
+    | 'coverGradient'
+    | 'hosts'
+    | 'greeting'
+    | 'quote'
+    | 'loveStory'
+    | 'events'
+    | 'music'
+    | 'streamingUrl'
+    | 'rsvpDeadline'
+    | 'gift'
+    | 'settings'
+  >
+>
+
+export interface CreateInvitationPayload {
+  title: string
+  eventType?: string
+  slug?: string
+}
+
+export interface PublishInvitationResult {
+  transaction: InvitationTransaction
+  snapToken: string | null
+  clientKey: string | null
+  invitationStatus: string
+}
+
+export interface GuestPayload {
+  name: string
+  phone?: string
+  group?: string
+  quota?: number
+  rsvp?: string
+  message?: string
+}
+
+export interface PublicRsvpPayload {
+  name: string
+  rsvp: 'hadir' | 'tidak' | 'ragu'
+  quota?: number
+  guestId?: string
+}
+
+export interface PublicWishPayload {
+  name: string
+  message: string
+  guestId?: string
 }
 
 export interface EditorModule {

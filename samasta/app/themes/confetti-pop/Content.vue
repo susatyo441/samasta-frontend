@@ -226,8 +226,13 @@ function mediaStyle(url?: string) {
       </div>
 
       <GiftAccounts :gift="gift" class="cp-fade-up" />
-      <RsvpForm :deadline="invitation.rsvpDeadline" class="cp-fade-up" />
-      <WishList v-if="showGuestBook" :messages="guestMessages" class="cp-fade-up" />
+      <RsvpForm :slug="invitation.slug" :deadline="invitation.rsvpDeadline" class="cp-fade-up" />
+      <WishList
+        v-if="showGuestBook"
+        :slug="invitation.slug"
+        :messages="guestMessages"
+        class="cp-fade-up"
+      />
 
       <p class="pt-2 text-center text-[11px] tracking-wide text-[var(--cp-muted)]">
         Dibuat dengan

@@ -6,6 +6,7 @@ defineProps<{
 
 const { user } = useAuth()
 const { signOut } = useLogout()
+const { collapsed, toggle } = useDashboardSidebar()
 const menuOpen = ref(false)
 
 async function onLogout() {
@@ -31,11 +32,32 @@ onBeforeUnmount(() => {
 <template>
   <header class="sticky top-0 z-30 border-b border-samasta-burgundy/10 bg-white/80 backdrop-blur-md">
     <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
-      <div class="min-w-0">
-        <p class="truncate font-display text-xl font-semibold text-samasta-burgundy sm:text-2xl">
-          {{ title }}
-        </p>
-        <p v-if="subtitle" class="truncate text-xs text-samasta-muted sm:text-sm">{{ subtitle }}</p>
+      <div class="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          class="hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg text-samasta-charcoal/70 transition hover:bg-samasta-cream-dark hover:text-samasta-charcoal lg:inline-flex"
+          :aria-label="collapsed ? 'Perluas sidebar' : 'Minimize sidebar'"
+          :aria-pressed="collapsed"
+          @click="toggle"
+        >
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 5.25h16.5A1.5 1.5 0 0121.75 6.75v10.5a1.5 1.5 0 01-1.5 1.5H3.75a1.5 1.5 0 01-1.5-1.5V6.75a1.5 1.5 0 011.5-1.5z"
+            />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 5.25v13.5" />
+          </svg>
+        </button>
+
+        <span class="hidden h-5 w-px shrink-0 bg-samasta-burgundy/15 lg:block" aria-hidden="true" />
+
+        <div class="min-w-0">
+          <p class="truncate font-display text-xl font-semibold text-samasta-burgundy sm:text-2xl">
+            {{ title }}
+          </p>
+          <p v-if="subtitle" class="truncate text-xs text-samasta-muted sm:text-sm">{{ subtitle }}</p>
+        </div>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">

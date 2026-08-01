@@ -24,6 +24,14 @@ const active = ref(true)
 const selectedModule = ref<string | null>(null)
 const copied = ref(false)
 
+function onSelectModule(moduleId: string) {
+  if (moduleId === 'rsvp') {
+    navigateTo(`/dashboard/undangan/${route.params.id}/rsvp`)
+    return
+  }
+  selectedModule.value = moduleId
+}
+
 watch(
   invitation,
   (value) => {
@@ -170,7 +178,7 @@ function onActiveChange() {
           <InvitationFeatureGrid
             :event-type="(invitation.eventType as 'wedding' | 'birthday' | 'other')"
             :modules="editorModules"
-            @select="selectedModule = $event"
+            @select="onSelectModule"
           />
 
           <button
