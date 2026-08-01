@@ -6,7 +6,7 @@ definePageMeta({
 
 useSeoMeta({ title: 'Undangan – Samasta' })
 
-const { invitations } = useInvitationList()
+const { invitations } = useInvitations()
 </script>
 
 <template>

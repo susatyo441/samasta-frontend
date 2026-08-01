@@ -6,7 +6,6 @@ import {
   eventTypeStoryLabel,
 } from '~/utils/invitationDisplay'
 import { formatDateId } from '~/utils/formatDate'
-import { formatMoney } from '~/utils/formatMoney'
 import { initials } from '~/utils/initials'
 
 const props = defineProps<{
@@ -150,7 +149,7 @@ function submitWish() {
             class="rounded-3xl bg-white p-4 shadow-sm"
           >
             <p class="font-medium">{{ item.name }}</p>
-            <p class="text-sm text-samasta-muted">{{ formatMoney(item.price) }}</p>
+            <p class="text-sm text-samasta-muted">Rp{{ item.price.toLocaleString('id-ID') }}</p>
           </div>
         </div>
       </div>

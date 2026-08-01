@@ -49,7 +49,9 @@ export function invitationTransactionsQueryOptions() {
     key: INVITATION_QUERY_KEYS.transactions(),
     query: () => {
       const $larafetch = useSanctumClient()
-      return $larafetch<{ data: InvitationTransaction[] }>('/api/invitation-transactions')
+      return $larafetch<{ data: InvitationTransaction[] } | InvitationTransaction[]>(
+        '/api/invitation-transactions',
+      )
     },
   }
 }

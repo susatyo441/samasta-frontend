@@ -7,7 +7,7 @@ definePageMeta({
 useSeoMeta({ title: 'Dashboard – Samasta' })
 
 const { user } = useAuth()
-const { invitations } = useInvitationList()
+const { invitations } = useInvitations()
 </script>
 
 <template>

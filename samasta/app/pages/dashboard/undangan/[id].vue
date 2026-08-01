@@ -13,7 +13,7 @@ useSeoMeta({
 const route = useRoute()
 const { user } = useAuth()
 const { invitation } = useInvitationById(computed(() => String(route.params.id)))
-const { editorModules } = useEditorModules()
+const { editorModules } = useInvitations()
 
 const active = ref(true)
 const selectedModule = ref<string | null>(null)
