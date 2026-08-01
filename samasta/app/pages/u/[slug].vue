@@ -4,9 +4,9 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { getBySlug } = useInvitations()
+const slug = computed(() => String(route.params.slug))
+const { invitation: invite, query } = usePublicInvitation(slug)
 
-const invite = computed(() => getBySlug(String(route.params.slug)))
 const opened = ref(false)
 const rsvpName = ref('')
 const rsvpStatus = ref<'hadir' | 'tidak' | 'ragu'>('hadir')
@@ -14,6 +14,19 @@ const wishName = ref('')
 const wishMessage = ref('')
 const wishSent = ref(false)
 const rsvpSent = ref(false)
+
+const loadError = computed(() => {
+  if (query.error.value) return 'Undangan tidak ditemukan atau belum dipublikasikan.'
+  return ''
+})
+
+const isLoading = computed(() => {
+  const asyncStatus = (query as { asyncStatus?: { value: string } }).asyncStatus?.value
+  if (asyncStatus) return asyncStatus === 'loading'
+  return query.status.value === 'pending'
+})
+
+const showNotFound = computed(() => !isLoading.value && (Boolean(loadError.value) || !invite.value))
 
 const guestMessages = computed(() =>
   (invite.value?.guests || []).filter((guest) => guest.message),
@@ -54,9 +67,13 @@ useSeoMeta({
 </script>
 
 <template>
-  <div v-if="!invite" class="flex min-h-screen items-center justify-center bg-samasta-cream px-4 text-center">
+  <div v-if="isLoading" class="flex min-h-screen items-center justify-center bg-samasta-cream px-4 text-center">
+    <p class="text-samasta-muted">Memuat undangan...</p>
+  </div>
+
+  <div v-else-if="showNotFound" class="flex min-h-screen items-center justify-center bg-samasta-cream px-4 text-center">
     <div>
-      <p class="font-display text-3xl text-samasta-burgundy">Undangan tidak ditemukan</p>
+      <p class="font-display text-3xl text-samasta-burgundy">{{ loadError || 'Undangan tidak ditemukan' }}</p>
       <NuxtLink to="/" class="btn-primary mt-6 inline-flex">Kembali ke Beranda</NuxtLink>
     </div>
   </div>

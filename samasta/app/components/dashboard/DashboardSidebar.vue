@@ -14,7 +14,7 @@ function isActive(match: string[]) {
 }
 
 async function onLogout() {
-  logout()
+  await logout()
   await navigateTo('/login')
 }
 </script>

@@ -1,27 +1,31 @@
 <script setup lang="ts">
+import { useMutation } from '@pinia/colada'
+import { extractErrorMessage, handleMutationError } from '~/utils/handleMutationError'
+
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['sanctum:guest'],
+  layout: false,
 })
 
-const email = ref('demo@samasta.app')
-const password = ref('samasta123')
-const error = ref('')
-const loading = ref(false)
 const { login } = useAuth()
 
-async function onSubmit() {
-  error.value = ''
-  loading.value = true
-  const result = login(email.value.trim(), password.value)
-  loading.value = false
+const { form, validationErrors, hasError } = useForm({
+  email: 'demo@samasta.app',
+  password: 'samasta123',
+})
 
-  if (!result.ok) {
-    error.value = result.message
-    return
-  }
+const error = ref('')
 
-  await navigateTo('/dashboard')
-}
+const { mutate: handleLogin, isLoading } = useMutation({
+  mutation: () => login(form.value),
+  onSuccess: () => {
+    navigateTo('/dashboard')
+  },
+  onError: (err) => {
+    error.value = extractErrorMessage(err, 'Email atau kata sandi salah.')
+    handleMutationError(err, { validationErrors, silent: true })
+  },
+})
 
 useSeoMeta({
   title: 'Masuk – Samasta',
@@ -45,33 +49,39 @@ useSeoMeta({
         <p class="mt-2 text-sm text-samasta-muted">Masuk untuk mengelola undangan digitalmu.</p>
       </div>
 
-      <form class="dash-card space-y-4 !p-5 sm:!p-6" @submit.prevent="onSubmit">
+      <form class="dash-card space-y-4 !p-5 sm:!p-6" @submit.prevent="() => handleLogin()">
         <div>
           <label class="mb-1.5 block text-xs font-medium text-samasta-muted">Email</label>
           <input
-            v-model="email"
+            id="email"
+            v-model="form.email"
             type="email"
             required
             class="w-full rounded-2xl border border-samasta-burgundy/15 bg-white px-4 py-3 text-sm outline-none ring-samasta-burgundy/30 focus:ring-2"
+            :aria-invalid="hasError('email')"
             placeholder="nama@email.com"
           >
+          <p v-if="hasError('email')" class="mt-1 text-xs text-rose-600">{{ validationErrors.email?.[0] }}</p>
         </div>
 
         <div>
           <label class="mb-1.5 block text-xs font-medium text-samasta-muted">Kata sandi</label>
           <input
-            v-model="password"
+            id="password"
+            v-model="form.password"
             type="password"
             required
             class="w-full rounded-2xl border border-samasta-burgundy/15 bg-white px-4 py-3 text-sm outline-none ring-samasta-burgundy/30 focus:ring-2"
+            :aria-invalid="hasError('password')"
             placeholder="••••••••"
           >
+          <p v-if="hasError('password')" class="mt-1 text-xs text-rose-600">{{ validationErrors.password?.[0] }}</p>
         </div>
 
         <p v-if="error" class="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-600">{{ error }}</p>
 
-        <button type="submit" class="btn-primary w-full" :disabled="loading">
-          {{ loading ? 'Memproses...' : 'Masuk' }}
+        <button type="submit" class="btn-primary w-full" :disabled="isLoading">
+          {{ isLoading ? 'Memproses...' : 'Masuk' }}
         </button>
 
         <p class="rounded-xl bg-samasta-cream px-3 py-2 text-center text-[11px] text-samasta-muted">

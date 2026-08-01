@@ -1,14 +1,37 @@
-import dummyInvitations from '~/data/dummy-invitations.json'
+import { useQuery } from '@pinia/colada'
+import {
+  editorModulesQueryOptions,
+  invitationByIdQueryOptions,
+  invitationListQueryOptions,
+  invitationTransactionsQueryOptions,
+  publicInvitationBySlugQueryOptions,
+} from '~/queries/invitations'
+import type { Invitation, InvitationTransaction } from '~/types'
 
-export type Invitation = (typeof dummyInvitations.invitations)[number]
+function unwrapResource<T>(payload: T | { data: T } | null | undefined): T | null {
+  if (!payload) return null
+  if (typeof payload === 'object' && 'data' in payload) {
+    return payload.data
+  }
+  return payload
+}
 
 export function useInvitations() {
-  function getById(id: string) {
-    return dummyInvitations.invitations.find((item) => item.id === id) || null
-  }
+  const listQuery = useQuery(invitationListQueryOptions())
+  const transactionsQuery = useQuery(invitationTransactionsQueryOptions())
+  const modulesQuery = useQuery(editorModulesQueryOptions())
 
-  function getBySlug(slug: string) {
-    return dummyInvitations.invitations.find((item) => item.slug === slug) || null
+  const invitations = computed(() => listQuery.data.value?.data ?? [])
+
+  const transactions = computed(() => {
+    const payload = transactionsQuery.data.value
+    return unwrapResource(payload) ?? []
+  })
+
+  const editorModules = computed(() => modulesQuery.data.value?.editorModules ?? [])
+
+  function getById(id: string | number) {
+    return invitations.value.find((item) => String(item.id) === String(id)) || null
   }
 
   function publicPath(slug: string) {
@@ -16,10 +39,41 @@ export function useInvitations() {
   }
 
   return {
-    invitations: dummyInvitations.invitations,
-    editorModules: dummyInvitations.editorModules,
+    invitations,
+    transactions,
+    editorModules,
+    listQuery,
+    transactionsQuery,
+    modulesQuery,
     getById,
-    getBySlug,
     publicPath,
   }
 }
+
+export function useInvitationById(id: MaybeRefOrGetter<string | number>) {
+  const invitationId = computed(() => toValue(id))
+
+  const query = useQuery(() => ({
+    ...invitationByIdQueryOptions(invitationId.value),
+    enabled: Boolean(invitationId.value),
+  }))
+
+  const invitation = computed(() => unwrapResource(query.data.value))
+
+  return { query, invitation }
+}
+
+export function usePublicInvitation(slug: MaybeRefOrGetter<string>) {
+  const invitationSlug = computed(() => toValue(slug))
+
+  const query = useQuery(() => ({
+    ...publicInvitationBySlugQueryOptions(invitationSlug.value),
+    enabled: Boolean(invitationSlug.value),
+  }))
+
+  const invitation = computed(() => unwrapResource(query.data.value))
+
+  return { query, invitation }
+}
+
+export type { Invitation, InvitationTransaction }

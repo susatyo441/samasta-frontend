@@ -1,13 +1,13 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth',
+  middleware: ['sanctum:auth'],
 })
 
 const route = useRoute()
-const { getInvitationById, editorModules } = useAuth()
+const { invitation } = useInvitationById(computed(() => String(route.params.id)))
+const { editorModules } = useInvitations()
 
-const invitation = computed(() => getInvitationById(String(route.params.id)))
 const active = ref(true)
 const selectedModule = ref<string | null>(null)
 

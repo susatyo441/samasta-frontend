@@ -1,11 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth',
+  middleware: ['sanctum:auth'],
 })
 
-const { getTransactions } = useAuth()
-const transactions = computed(() => getTransactions())
+const { transactions } = useInvitations()
 
 useSeoMeta({ title: 'Transaksi – Samasta' })
 </script>

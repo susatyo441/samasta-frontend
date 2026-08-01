@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth',
+  middleware: ['sanctum:auth'],
 })
 
 useSeoMeta({ title: 'Bantuan – Samasta' })

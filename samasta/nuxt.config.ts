@@ -1,9 +1,32 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NUXT_DEVTOOLS_ENABLED === 'true' },
 
-  modules: ['@nuxtjs/tailwindcss', '@nuxt/fonts'],
+  future: {
+    compatibilityVersion: 4,
+  },
+
+  runtimeConfig: {
+    public: {
+      sanctum: {
+        baseUrl: import.meta.env.NUXT_PUBLIC_SANCTUM_BASE_URL || 'http://localhost:8000',
+        csrf: {
+          cookie: import.meta.env.NUXT_PUBLIC_SANCTUM_CSRF_COOKIE || 'XSRF-TOKEN',
+        },
+      },
+    },
+  },
+
+  modules: [
+    '@vueuse/nuxt',
+    '@nuxt/fonts',
+    '@nuxt/icon',
+    '@nuxtjs/tailwindcss',
+    'nuxt-auth-sanctum',
+    '@pinia/colada-nuxt',
+    '@pinia/nuxt',
+  ],
 
   fonts: {
     families: [
@@ -27,4 +50,27 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  icon: {
+    mode: 'css',
+    cssLayer: 'base',
+    clientBundle: {
+      scan: true,
+    },
+  },
+
+  sanctum: {
+    redirectIfUnauthenticated: true,
+    endpoints: {
+      login: '/api/login',
+      logout: '/api/logout',
+      user: '/api/user',
+    },
+    redirect: {
+      onLogin: '/dashboard',
+      onLogout: '/login',
+      onAuthOnly: '/login',
+      onGuestOnly: '/dashboard',
+    },
+  },
 })

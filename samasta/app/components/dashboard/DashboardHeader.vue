@@ -9,7 +9,7 @@ const menuOpen = ref(false)
 
 async function onLogout() {
   menuOpen.value = false
-  logout()
+  await logout()
   await navigateTo('/login')
 }
 
