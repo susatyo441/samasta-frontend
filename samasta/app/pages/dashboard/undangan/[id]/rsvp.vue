@@ -6,7 +6,7 @@ import { downloadGuestImportTemplate, invitationGuestsQueryOptions } from '~/que
 import { useInvitationGuestMutations } from '~/composables/useInvitationMutations'
 import { guestDbId } from '~/utils/guestId'
 import { handleMutationError } from '~/utils/handleMutationError'
-import { rsvpStatusClasses } from '~/utils/invitationDisplay'
+import { rsvpStatusClasses, waStatusClasses, waStatusLabel } from '~/utils/invitationDisplay'
 import {
   buildGuestInvitationUrl,
   buildGuestWhatsappUrl,
@@ -62,7 +62,8 @@ const stats = computed(() => {
   }
 })
 
-const { createGuest, updateGuest, removeGuest, importCsv } = useInvitationGuestMutations(invitationId)
+const { createGuest, updateGuest, removeGuest, importCsv, blastWhatsapp, sendWhatsapp } =
+  useInvitationGuestMutations(invitationId)
 
 const showForm = ref(false)
 const editingGuest = ref<InvitationGuest | null>(null)
@@ -180,6 +181,39 @@ async function copyGuestLink(guest: InvitationGuest) {
     toast.error('Gagal menyalin link.')
   }
 }
+
+const { mutate: runBlast, isLoading: blasting } = useMutation({
+  mutation: async () => {
+    const ids = filteredGuests.value
+      .filter((guest) => guest.phone?.trim())
+      .map((guest) => guest.id)
+    return blastWhatsapp({ guestIds: ids, skipSent: true })
+  },
+  onSuccess: (result) => {
+    toast.success(
+      `WA selesai: ${result.sent} terkirim, ${result.failed} gagal, ${result.skipped} dilewati.`,
+    )
+  },
+  onError: (err) => handleMutationError(err),
+})
+
+const { mutate: runSendOne, isLoading: sendingOne } = useMutation({
+  mutation: (guest: InvitationGuest) => sendWhatsapp(guestDbId(guest.id)),
+  onSuccess: () => toast.success('WhatsApp terkirim.'),
+  onError: (err) => handleMutationError(err),
+})
+
+function confirmBlast() {
+  const withPhone = filteredGuests.value.filter((guest) => guest.phone?.trim()).length
+  if (!withPhone) {
+    toast.error('Tidak ada tamu ber-nomor WA pada filter ini.')
+    return
+  }
+  if (!confirm(`Kirim undangan via Fonnte ke ${withPhone} tamu (lewati yang sudah terkirim)?`)) {
+    return
+  }
+  runBlast()
+}
 </script>
 
 <template>
@@ -199,6 +233,12 @@ async function copyGuestLink(guest: InvitationGuest) {
         </NuxtLink>
 
         <div class="flex flex-wrap gap-2">
+          <NuxtLink
+            :to="`/dashboard/undangan/${invitationId}/analytics`"
+            class="btn-secondary !px-4 !py-2 text-xs"
+          >
+            Analitik
+          </NuxtLink>
           <button
             v-if="filteredGuests.length"
             type="button"
@@ -206,6 +246,15 @@ async function copyGuestLink(guest: InvitationGuest) {
             @click="showInviteSheet = true"
           >
             Kirim undangan ({{ filteredGuests.length }})
+          </button>
+          <button
+            v-if="filteredGuests.some((g) => g.phone)"
+            type="button"
+            class="btn-primary !px-4 !py-2 text-xs"
+            :disabled="blasting"
+            @click="confirmBlast"
+          >
+            {{ blasting ? 'Mengirim WA...' : 'Blast Fonnte' }}
           </button>
           <input ref="csvInput" type="file" accept=".csv,text/csv" class="hidden" @change="onCsvSelected">
           <a :href="templateUrl" target="_blank" class="btn-secondary !px-4 !py-2 text-xs">Template CSV</a>
@@ -282,6 +331,7 @@ async function copyGuestLink(guest: InvitationGuest) {
                 <th class="hidden px-4 py-3 font-semibold sm:table-cell">Telepon</th>
                 <th class="px-4 py-3 font-semibold">Kuota</th>
                 <th class="px-4 py-3 font-semibold">RSVP</th>
+                <th class="px-4 py-3 font-semibold">WA</th>
                 <th class="px-4 py-3 font-semibold text-right">Aksi</th>
               </tr>
             </thead>
@@ -310,6 +360,15 @@ async function copyGuestLink(guest: InvitationGuest) {
                     {{ rsvpLabels[guest.rsvp || 'belum'] || guest.rsvp }}
                   </span>
                 </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                    :class="waStatusClasses(guest.waStatus)"
+                    :title="guest.waError || undefined"
+                  >
+                    {{ guest.phone ? waStatusLabel(guest.waStatus) : '—' }}
+                  </span>
+                </td>
                 <td class="px-4 py-3 text-right">
                   <div class="inline-flex flex-wrap justify-end gap-2">
                     <button
@@ -329,6 +388,15 @@ async function copyGuestLink(guest: InvitationGuest) {
                       WA
                     </a>
                     <button
+                      v-if="guest.phone"
+                      type="button"
+                      class="text-xs font-semibold text-samasta-burgundy hover:underline"
+                      :disabled="sendingOne || blasting"
+                      @click="runSendOne(guest)"
+                    >
+                      Fonnte
+                    </button>
+                    <button
                       type="button"
                       class="text-xs font-semibold text-samasta-burgundy hover:underline"
                       @click="startEdit(guest)"
@@ -347,7 +415,7 @@ async function copyGuestLink(guest: InvitationGuest) {
                 </td>
               </tr>
               <tr v-if="!filteredGuests.length">
-                <td colspan="6" class="px-4 py-10 text-center text-samasta-muted">
+                <td colspan="7" class="px-4 py-10 text-center text-samasta-muted">
                   {{ guests.length ? 'Tidak ada tamu yang cocok dengan filter.' : 'Belum ada tamu. Tambah manual atau import CSV.' }}
                 </td>
               </tr>

@@ -17,6 +17,23 @@ export interface InvitationGuest {
   quota?: number
   rsvp?: string
   message?: string
+  waStatus?: string | null
+  waSentAt?: string | null
+  waError?: string | null
+}
+
+export interface InvitationAnalytics {
+  invited: number
+  seats: number
+  wishes: number
+  rsvp: { hadir: number; tidak: number; ragu: number; belum: number }
+  wa: {
+    terkirim: number
+    gagal: number
+    pending: number
+    belum: number
+    noPhone: number
+  }
 }
 
 export interface InvitationMedia {

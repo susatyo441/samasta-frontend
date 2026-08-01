@@ -10,6 +10,20 @@ export function rsvpStatusClasses(rsvp: string) {
   return 'bg-amber-100 text-amber-700'
 }
 
+export function waStatusClasses(status?: string | null) {
+  if (status === 'terkirim') return 'bg-green-100 text-green-700'
+  if (status === 'gagal') return 'bg-rose-100 text-rose-700'
+  if (status === 'pending') return 'bg-sky-100 text-sky-700'
+  return 'bg-samasta-cream text-samasta-muted'
+}
+
+export function waStatusLabel(status?: string | null) {
+  if (status === 'terkirim') return 'Terkirim'
+  if (status === 'gagal') return 'Gagal'
+  if (status === 'pending') return 'Pending'
+  return 'Belum'
+}
+
 export function eventTypeCoverLabel(eventType: string) {
   if (eventType === 'wedding') return 'The Wedding Of'
   if (eventType === 'birthday') return 'Birthday Invitation'

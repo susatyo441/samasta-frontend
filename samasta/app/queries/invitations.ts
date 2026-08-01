@@ -9,6 +9,7 @@ import type {
   InvitationTheme,
   InvitationTransaction,
   InvitationUpdatePayload,
+  InvitationAnalytics,
   PaginatedInvitations,
   PublicRsvpPayload,
   PublicWishPayload,
@@ -28,6 +29,8 @@ export const INVITATION_QUERY_KEYS = {
   plans: () => [...INVITATION_QUERY_KEYS.root, 'plans'] as const,
   guests: (invitationId: string | number) =>
     [...INVITATION_QUERY_KEYS.byId(invitationId), 'guests'] as const,
+  analytics: (invitationId: string | number) =>
+    [...INVITATION_QUERY_KEYS.byId(invitationId), 'analytics'] as const,
 }
 
 export function invitationListQueryOptions() {
@@ -148,6 +151,48 @@ export function invitationGuestsQueryOptions(invitationId: string | number) {
       return $larafetch<{ data: InvitationGuest[] }>(`/api/invitations/${invitationId}/guests`)
     },
   }
+}
+
+export function invitationAnalyticsQueryOptions(invitationId: string | number) {
+  return {
+    key: INVITATION_QUERY_KEYS.analytics(invitationId),
+    query: () => {
+      const $larafetch = useSanctumClient()
+      return $larafetch<{ data: InvitationAnalytics }>(
+        `/api/invitations/${invitationId}/analytics`,
+      )
+    },
+  }
+}
+
+export async function blastInvitationWhatsapp(
+  invitationId: string | number,
+  payload?: { guestIds?: string[]; skipSent?: boolean },
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{
+    message: string
+    data: {
+      sent: number
+      failed: number
+      skipped: number
+      results: Array<{ guestId: string; name: string; status: string; reason?: string }>
+    }
+  }>(`/api/invitations/${invitationId}/guests/wa-blast`, {
+    method: 'POST',
+    body: payload ?? { skipSent: true },
+  })
+}
+
+export async function sendInvitationGuestWhatsapp(
+  invitationId: string | number,
+  guestId: string | number,
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: InvitationGuest; message: string }>(
+    `/api/invitations/${invitationId}/guests/${guestId}/wa-send`,
+    { method: 'POST' },
+  )
 }
 
 export async function createInvitation(payload: CreateInvitationPayload) {

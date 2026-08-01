@@ -153,6 +153,20 @@ function onActiveChange() {
             :messages="invitation.stats?.messages ?? 0"
           />
 
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <NuxtLink
+              :to="`/dashboard/undangan/${invitation.id}/rsvp`"
+              class="inline-flex items-center justify-center rounded-xl bg-white/15 px-3 py-2.5 text-xs font-semibold text-white ring-1 ring-white/25"
+            >
+              RSVP & Tamu
+            </NuxtLink>
+            <NuxtLink
+              :to="`/dashboard/undangan/${invitation.id}/analytics`"
+              class="inline-flex items-center justify-center rounded-xl bg-white/15 px-3 py-2.5 text-xs font-semibold text-white ring-1 ring-white/25"
+            >
+              Analitik
+            </NuxtLink>
+          </div>
           <button
             v-if="isDraft"
             type="button"

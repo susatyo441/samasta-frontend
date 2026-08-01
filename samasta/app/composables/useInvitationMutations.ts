@@ -1,5 +1,6 @@
 import { useQueryCache } from '@pinia/colada'
 import {
+  blastInvitationWhatsapp,
   createInvitation,
   createInvitationGuest,
   deleteInvitationGuest,
@@ -8,6 +9,7 @@ import {
   importInvitationGuests,
   INVITATION_QUERY_KEYS,
   publishInvitation,
+  sendInvitationGuestWhatsapp,
   updateInvitation,
   updateInvitationGuest,
   uploadInvitationMedia,
@@ -87,6 +89,7 @@ export function useInvitationGuestMutations(invitationId: MaybeRefOrGetter<strin
   async function invalidate() {
     const id = toValue(invitationId)
     await queryCache.invalidateQueries({ key: INVITATION_QUERY_KEYS.guests(id) })
+    await queryCache.invalidateQueries({ key: INVITATION_QUERY_KEYS.analytics(id) })
     await queryCache.invalidateQueries({ key: INVITATION_QUERY_KEYS.byId(id) })
   }
 
@@ -117,10 +120,26 @@ export function useInvitationGuestMutations(invitationId: MaybeRefOrGetter<strin
     return result
   }
 
+  async function blastWhatsapp(payload?: { guestIds?: string[]; skipSent?: boolean }) {
+    const id = toValue(invitationId)
+    const result = await blastInvitationWhatsapp(id, payload)
+    await invalidate()
+    return result.data
+  }
+
+  async function sendWhatsapp(guestId: string | number) {
+    const id = toValue(invitationId)
+    const result = await sendInvitationGuestWhatsapp(id, guestId)
+    await invalidate()
+    return result.data
+  }
+
   return {
     createGuest,
     updateGuest,
     removeGuest,
     importCsv,
+    blastWhatsapp,
+    sendWhatsapp,
   }
 }
