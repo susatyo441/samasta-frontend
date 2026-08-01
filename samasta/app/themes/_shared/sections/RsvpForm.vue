@@ -1,13 +1,26 @@
 <script setup lang="ts">
 import { usePublicGuestActions } from '~/themes/_shared/composables/usePublicGuestActions'
+import { usePublicGuestContext } from '~/themes/_shared/composables/usePublicGuestContext'
+import { formatDateId } from '~/utils/formatDate'
 
 const props = defineProps<{
   slug: string
   deadline?: string | null
 }>()
 
+const { prefilledName } = usePublicGuestContext()
+
 const name = ref('')
 const status = ref<'hadir' | 'tidak' | 'ragu'>('hadir')
+const quota = ref(1)
+
+watch(
+  prefilledName,
+  (value) => {
+    if (value && !name.value) name.value = value
+  },
+  { immediate: true },
+)
 
 const { rsvpSubmitting, rsvpSuccess, rsvpError, submitRsvp } = usePublicGuestActions(
   () => props.slug,
@@ -18,6 +31,7 @@ async function onSubmit() {
   await submitRsvp({
     name: name.value.trim(),
     status: status.value,
+    quota: quota.value,
   })
 }
 </script>
@@ -57,6 +71,17 @@ async function onSubmit() {
         >
           {{ opt.label }}
         </button>
+      </div>
+      <div v-if="status === 'hadir'">
+        <label class="text-xs font-medium text-samasta-muted">Jumlah tamu</label>
+        <input
+          v-model.number="quota"
+          type="number"
+          min="1"
+          max="20"
+          class="inv-section-input mt-1"
+          :disabled="rsvpSubmitting"
+        >
       </div>
       <p v-if="rsvpError" class="inv-section-alert inv-section-alert--error">{{ rsvpError }}</p>
       <button type="submit" class="inv-section-btn" :disabled="rsvpSubmitting">

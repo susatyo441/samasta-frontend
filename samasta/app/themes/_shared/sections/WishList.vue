@@ -1,14 +1,25 @@
 <script setup lang="ts">
 import type { InvitationGuest } from '~/types'
 import { usePublicGuestActions } from '~/themes/_shared/composables/usePublicGuestActions'
+import { usePublicGuestContext } from '~/themes/_shared/composables/usePublicGuestContext'
 
 const props = defineProps<{
   slug: string
   messages: InvitationGuest[]
 }>()
 
+const { prefilledName } = usePublicGuestContext()
+
 const name = ref('')
 const message = ref('')
+
+watch(
+  prefilledName,
+  (value) => {
+    if (value && !name.value) name.value = value
+  },
+  { immediate: true },
+)
 
 const { wishSubmitting, wishSuccess, wishError, submitWish } = usePublicGuestActions(
   () => props.slug,
@@ -23,7 +34,7 @@ async function onSubmit() {
   })
 
   if (ok) {
-    name.value = ''
+    name.value = prefilledName.value
     message.value = ''
   }
 }

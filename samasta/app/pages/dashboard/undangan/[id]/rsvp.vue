@@ -7,6 +7,10 @@ import { useInvitationGuestMutations } from '~/composables/useInvitationMutation
 import { guestDbId } from '~/utils/guestId'
 import { handleMutationError } from '~/utils/handleMutationError'
 import { rsvpStatusClasses } from '~/utils/invitationDisplay'
+import {
+  buildGuestInvitationUrl,
+  buildGuestWhatsappUrl,
+} from '~/utils/invitationUrl'
 
 definePageMeta({
   layout: 'dashboard',
@@ -72,6 +76,7 @@ const form = ref({
 
 const csvInput = ref<HTMLInputElement | null>(null)
 const templateUrl = downloadGuestImportTemplate()
+const showInviteSheet = ref(false)
 
 const rsvpLabels: Record<string, string> = {
   belum: 'Belum',
@@ -151,6 +156,30 @@ function confirmDelete(guest: InvitationGuest) {
   if (!confirm(`Hapus tamu "${guest.name}"?`)) return
   deleteGuest(guest)
 }
+
+function guestInviteLink(guest: InvitationGuest) {
+  if (!invitation.value) return ''
+  return buildGuestInvitationUrl(invitation.value.publicUrl, {
+    guestId: guest.id,
+    guestName: guest.name,
+  })
+}
+
+function guestWhatsappUrl(guest: InvitationGuest) {
+  if (!invitation.value) return '#'
+  return buildGuestWhatsappUrl(invitation.value.publicUrl, guest, invitation.value.title)
+}
+
+async function copyGuestLink(guest: InvitationGuest) {
+  const link = guestInviteLink(guest)
+  if (!link || !import.meta.client) return
+  try {
+    await navigator.clipboard.writeText(link)
+    toast.success(`Link ${guest.name} disalin.`)
+  } catch {
+    toast.error('Gagal menyalin link.')
+  }
+}
 </script>
 
 <template>
@@ -170,6 +199,14 @@ function confirmDelete(guest: InvitationGuest) {
         </NuxtLink>
 
         <div class="flex flex-wrap gap-2">
+          <button
+            v-if="filteredGuests.length"
+            type="button"
+            class="btn-secondary !px-4 !py-2 text-xs"
+            @click="showInviteSheet = true"
+          >
+            Kirim undangan ({{ filteredGuests.length }})
+          </button>
           <input ref="csvInput" type="file" accept=".csv,text/csv" class="hidden" @change="onCsvSelected">
           <a :href="templateUrl" target="_blank" class="btn-secondary !px-4 !py-2 text-xs">Template CSV</a>
           <button
@@ -274,7 +311,23 @@ function confirmDelete(guest: InvitationGuest) {
                   </span>
                 </td>
                 <td class="px-4 py-3 text-right">
-                  <div class="inline-flex gap-2">
+                  <div class="inline-flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      class="text-xs font-semibold text-samasta-muted hover:text-samasta-burgundy"
+                      title="Salin link personal"
+                      @click="copyGuestLink(guest)"
+                    >
+                      Link
+                    </button>
+                    <a
+                      :href="guestWhatsappUrl(guest)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-xs font-semibold text-green-700 hover:underline"
+                    >
+                      WA
+                    </a>
                     <button
                       type="button"
                       class="text-xs font-semibold text-samasta-burgundy hover:underline"
@@ -354,5 +407,13 @@ function confirmDelete(guest: InvitationGuest) {
         </button>
       </form>
     </div>
+
+    <InvitationGuestInviteSheet
+      v-if="showInviteSheet && invitation"
+      :guests="filteredGuests"
+      :public-path="invitation.publicUrl"
+      :invitation-title="invitation.title"
+      @close="showInviteSheet = false"
+    />
   </div>
 </template>

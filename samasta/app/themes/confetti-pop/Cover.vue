@@ -3,6 +3,7 @@ import type { Invitation } from '~/types'
 import { eventTypeCoverLabel } from '~/utils/invitationDisplay'
 import { formatDateId } from '~/utils/formatDate'
 import { useInvitationSections } from '~/themes/_shared/composables/useInvitationSections'
+import { usePublicGuestContext } from '~/themes/_shared/composables/usePublicGuestContext'
 import OrnamentField from './OrnamentField.vue'
 
 const props = defineProps<{
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const { coverUrl, primaryEvent } = useInvitationSections(() => props.invitation)
+const { guestName, hasPersonalization } = usePublicGuestContext(() => props.invitation)
 
 const hostNames = computed(() =>
   (props.invitation.hosts || []).map((host) => host.name).filter(Boolean),
@@ -44,6 +46,18 @@ const displayTitle = computed(() => {
       </div>
 
       <div class="cp-divider" />
+
+      <p
+        v-if="hasPersonalization"
+        class="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--cp-muted)]"
+      >
+        Kepada Yth.
+      </p>
+      <p v-if="guestName" class="cp-script mt-1 text-3xl text-[var(--cp-burgundy)]">
+        {{ guestName }}
+      </p>
+
+      <div v-if="hasPersonalization" class="cp-divider" />
 
       <h1 class="cp-script mt-2 text-4xl leading-tight text-[var(--cp-burgundy)] sm:text-5xl">
         {{ displayTitle }}

@@ -22,7 +22,10 @@ useSeoMeta({
 
 const active = ref(true)
 const selectedModule = ref<string | null>(null)
+const showPublish = ref(false)
 const copied = ref(false)
+
+const isDraft = computed(() => invitation.value?.status === 'draft')
 
 function onSelectModule(moduleId: string) {
   if (moduleId === 'rsvp') {
@@ -151,8 +154,18 @@ function onActiveChange() {
           />
 
           <button
+            v-if="isDraft"
             type="button"
             class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-samasta-burgundy"
+            @click="showPublish = true"
+          >
+            Publikasikan Undangan
+          </button>
+
+          <button
+            v-else
+            type="button"
+            class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-white/25"
             @click="selectedModule = 'theme'"
           >
             <span aria-hidden="true">◐</span> Pilih / Ganti Tema
@@ -217,6 +230,13 @@ function onActiveChange() {
       :module-id="selectedModule"
       :invitation="invitation"
       @close="selectedModule = null"
+    />
+
+    <InvitationPublishSheet
+      v-if="showPublish && invitation"
+      :invitation="invitation"
+      @close="showPublish = false"
+      @published="showPublish = false"
     />
   </div>
 </template>
