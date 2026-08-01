@@ -52,8 +52,11 @@ app/
 ├── layouts/
 ├── pages/
 ├── queries/
+├── themes/       # public invitation layouts (one package per componentKey)
 ├── types/
 └── utils/
 ```
 
 Patterns mirror **syncphony_frontend**: pure helpers in `utils/`, Vue-aware logic in `composables/`, Pinia Colada in `queries/`.
+
+Theme architecture (frontend POV): [docs/INVITATION_THEMES.md](./docs/INVITATION_THEMES.md). Backend catalog: `gsj-store/docs/INVITATION_THEMES.md`.
