@@ -51,6 +51,8 @@ export interface Invitation {
     venueName?: string
     venueAddress?: string
     mapsUrl?: string
+    /** Resolved iframe URL from public API (short-link expand). */
+    mapsEmbedUrl?: string | null
   }>
   gallery?: InvitationMedia[]
   coverImage?: InvitationMedia | null

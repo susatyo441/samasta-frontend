@@ -13,6 +13,7 @@ import WishList from '~/themes/_shared/sections/WishList.vue'
 import GiftAccounts from '~/themes/_shared/sections/GiftAccounts.vue'
 import MusicToggle from '~/themes/_shared/sections/MusicToggle.vue'
 import StreamingEmbed from '~/themes/_shared/sections/StreamingEmbed.vue'
+import MapsEmbed from '~/themes/_shared/sections/MapsEmbed.vue'
 import OrnamentField from './OrnamentField.vue'
 
 const props = defineProps<{
@@ -162,6 +163,7 @@ function mediaStyle(url?: string) {
           <div class="cp-divider" />
           <p v-if="event.venueName" class="font-medium text-[var(--cp-burgundy)]">{{ event.venueName }}</p>
           <p v-if="event.venueAddress" class="mt-1 text-sm text-[var(--cp-muted)]">{{ event.venueAddress }}</p>
+          <MapsEmbed :embed-url="event.mapsEmbedUrl" />
           <a
             v-if="event.mapsUrl"
             :href="event.mapsUrl"
