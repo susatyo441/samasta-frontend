@@ -7,13 +7,11 @@ import {
 } from '~/utils/invitationDisplay'
 import { formatDateId } from '~/utils/formatDate'
 import { initials } from '~/utils/initials'
-import { resolveMapsEmbedUrl } from '~/utils/mapsEmbed'
 import { useInvitationSections } from '~/themes/_shared/composables/useInvitationSections'
 import RsvpForm from '~/themes/_shared/sections/RsvpForm.vue'
 import WishList from '~/themes/_shared/sections/WishList.vue'
 import GiftAccounts from '~/themes/_shared/sections/GiftAccounts.vue'
 import MusicToggle from '~/themes/_shared/sections/MusicToggle.vue'
-import MapsEmbed from '~/themes/_shared/sections/MapsEmbed.vue'
 import StreamingEmbed from '~/themes/_shared/sections/StreamingEmbed.vue'
 import OrnamentField from './OrnamentField.vue'
 
@@ -65,24 +63,6 @@ function mediaStyle(url?: string) {
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   }
-}
-
-function mapsOpenUrl(event: NonNullable<Invitation['events']>[number]) {
-  const embed = resolveMapsEmbedUrl({
-    mapsUrl: event.mapsUrl,
-    venueName: event.venueName,
-    venueAddress: event.venueAddress,
-  })
-  if (!embed) return event.mapsUrl || null
-  // Convert embed URL to a normal Maps search URL for the open button
-  try {
-    const parsed = new URL(embed)
-    const q = parsed.searchParams.get('q')
-    if (q) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`
-  } catch {
-    // fall through
-  }
-  return event.mapsUrl || null
 }
 </script>
 
@@ -182,19 +162,14 @@ function mapsOpenUrl(event: NonNullable<Invitation['events']>[number]) {
           <div class="cp-divider" />
           <p v-if="event.venueName" class="font-medium text-[var(--cp-burgundy)]">{{ event.venueName }}</p>
           <p v-if="event.venueAddress" class="mt-1 text-sm text-[var(--cp-muted)]">{{ event.venueAddress }}</p>
-          <MapsEmbed
-            :maps-url="event.mapsUrl"
-            :venue-name="event.venueName"
-            :venue-address="event.venueAddress"
-          />
           <a
-            v-if="mapsOpenUrl(event)"
-            :href="mapsOpenUrl(event)!"
+            v-if="event.mapsUrl"
+            :href="event.mapsUrl"
             target="_blank"
             rel="noopener noreferrer"
             class="cp-btn-secondary mt-4 inline-flex !py-2 text-xs"
           >
-            Buka di Google Maps
+            Buka Maps
           </a>
         </article>
       </div>
