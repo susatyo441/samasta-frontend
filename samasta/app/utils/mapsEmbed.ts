@@ -2,9 +2,32 @@
  * Build a Google Maps iframe embed URL from a share link or venue text.
  * Uses the legacy output=embed endpoint (no API key required).
  */
+export function isGenericMapsUrl(mapsUrl: string): boolean {
+  try {
+    const parsed = new URL(mapsUrl.trim())
+    if (!parsed.hostname.includes('google') && !parsed.hostname.includes('maps.app.goo.gl') && !parsed.hostname.includes('goo.gl')) {
+      return false
+    }
+    const path = parsed.pathname.replace(/\/+$/, '') || '/'
+    const hasQueryPlace =
+      Boolean(parsed.searchParams.get('q') || parsed.searchParams.get('query'))
+    const hasPlacePath = /\/maps\/(place|dir|search)\//.test(parsed.pathname)
+    const hasCoords = /@-?\d/.test(parsed.pathname + parsed.hash)
+    const hasEmbed = parsed.pathname.includes('/maps/embed')
+    const isShortLink = parsed.hostname.includes('goo.gl') || parsed.hostname === 'maps.app.goo.gl'
+
+    if (hasQueryPlace || hasPlacePath || hasCoords || hasEmbed || isShortLink) return false
+
+    // Bare homepage /maps with no place info — e.g. https://maps.google.com
+    return path === '/' || path === '/maps' || path === '/maps/embed'
+  } catch {
+    return false
+  }
+}
+
 export function mapsEmbedFromUrl(mapsUrl: string): string | null {
   const trimmed = mapsUrl.trim()
-  if (!trimmed) return null
+  if (!trimmed || isGenericMapsUrl(trimmed)) return null
 
   if (trimmed.includes('/maps/embed')) return trimmed
 
@@ -23,14 +46,16 @@ export function mapsEmbedFromUrl(mapsUrl: string): string | null {
     const coordMatch = trimmed.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/)
     if (coordMatch) return embedQuery(`${coordMatch[1]},${coordMatch[2]}`)
 
-    if (parsed.hostname.includes('google') && parsed.pathname.includes('/maps')) {
-      return embedQuery(trimmed)
+    // Short links cannot be resolved client-side without a fetch redirect;
+    // fall through so caller can use venue text instead.
+    if (parsed.hostname.includes('goo.gl') || parsed.hostname === 'maps.app.goo.gl') {
+      return null
     }
   } catch {
-    return embedQuery(trimmed)
+    return null
   }
 
-  return embedQuery(trimmed)
+  return null
 }
 
 export function mapsEmbedFromVenue(venueName?: string, venueAddress?: string): string | null {
@@ -45,11 +70,12 @@ export function resolveMapsEmbedUrl(options: {
   venueAddress?: string
 }): string | null {
   if (options.mapsUrl?.trim()) {
-    return mapsEmbedFromUrl(options.mapsUrl)
+    const fromUrl = mapsEmbedFromUrl(options.mapsUrl)
+    if (fromUrl) return fromUrl
   }
   return mapsEmbedFromVenue(options.venueName, options.venueAddress)
 }
 
 function embedQuery(query: string) {
-  return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
+  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`
 }

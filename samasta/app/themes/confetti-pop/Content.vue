@@ -7,6 +7,7 @@ import {
 } from '~/utils/invitationDisplay'
 import { formatDateId } from '~/utils/formatDate'
 import { initials } from '~/utils/initials'
+import { resolveMapsEmbedUrl } from '~/utils/mapsEmbed'
 import { useInvitationSections } from '~/themes/_shared/composables/useInvitationSections'
 import RsvpForm from '~/themes/_shared/sections/RsvpForm.vue'
 import WishList from '~/themes/_shared/sections/WishList.vue'
@@ -64,6 +65,24 @@ function mediaStyle(url?: string) {
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   }
+}
+
+function mapsOpenUrl(event: NonNullable<Invitation['events']>[number]) {
+  const embed = resolveMapsEmbedUrl({
+    mapsUrl: event.mapsUrl,
+    venueName: event.venueName,
+    venueAddress: event.venueAddress,
+  })
+  if (!embed) return event.mapsUrl || null
+  // Convert embed URL to a normal Maps search URL for the open button
+  try {
+    const parsed = new URL(embed)
+    const q = parsed.searchParams.get('q')
+    if (q) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`
+  } catch {
+    // fall through
+  }
+  return event.mapsUrl || null
 }
 </script>
 
@@ -169,8 +188,8 @@ function mediaStyle(url?: string) {
             :venue-address="event.venueAddress"
           />
           <a
-            v-if="event.mapsUrl"
-            :href="event.mapsUrl"
+            v-if="mapsOpenUrl(event)"
+            :href="mapsOpenUrl(event)!"
             target="_blank"
             rel="noopener noreferrer"
             class="cp-btn-secondary mt-4 inline-flex !py-2 text-xs"
