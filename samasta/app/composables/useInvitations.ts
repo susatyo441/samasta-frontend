@@ -45,15 +45,33 @@ export function useInvitationById(id: MaybeRefOrGetter<string | number>) {
 
 export function usePublicInvitation(slug: MaybeRefOrGetter<string>) {
   const invitationSlug = computed(() => toValue(slug))
+  const accessCode = ref('')
+
+  onMounted(() => {
+    if (!import.meta.client) return
+    accessCode.value = sessionStorage.getItem(`samasta-unlock:${invitationSlug.value}`) || ''
+  })
+
+  watch(invitationSlug, (next) => {
+    if (!import.meta.client) return
+    accessCode.value = sessionStorage.getItem(`samasta-unlock:${next}`) || ''
+  })
 
   const query = useQuery(() => ({
-    ...publicInvitationBySlugQueryOptions(invitationSlug.value),
+    ...publicInvitationBySlugQueryOptions(invitationSlug.value, accessCode.value || undefined),
     enabled: Boolean(invitationSlug.value),
   }))
 
   const invitation = computed(() => unwrapResource(query.data.value))
 
-  return { query, invitation }
+  function rememberAccessCode(code: string) {
+    accessCode.value = code
+    if (import.meta.client) {
+      sessionStorage.setItem(`samasta-unlock:${invitationSlug.value}`, code)
+    }
+  }
+
+  return { query, invitation, accessCode, rememberAccessCode }
 }
 
 export type { Invitation, InvitationTransaction }

@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import type { Invitation } from '~/types'
 import type { InvitationEditorDraft } from '~/utils/invitationEditor'
 import { EDITOR_INPUT_CLASS } from '~/utils/invitationEditor'
 
 defineProps<{
   draft: InvitationEditorDraft
+  invitation: Invitation
 }>()
 </script>
 
@@ -36,7 +38,20 @@ defineProps<{
     </label>
     <label class="flex items-center gap-2 rounded-2xl border border-samasta-burgundy/10 px-3 py-3 text-sm">
       <input v-model="draft.settings.passwordProtected" type="checkbox" class="rounded border-samasta-burgundy/30">
-      Lindungi dengan kode akses (UI)
+      Lindungi dengan kode akses
     </label>
+
+    <div
+      v-if="draft.settings.passwordProtected"
+      class="rounded-2xl border border-samasta-burgundy/10 bg-samasta-cream/60 px-3 py-3"
+    >
+      <p class="text-xs font-medium text-samasta-muted">Kode akses undangan</p>
+      <p class="mt-1 font-mono text-lg font-semibold tracking-wide text-samasta-burgundy">
+        {{ invitation.accessCode || '—' }}
+      </p>
+      <p class="mt-1 text-xs text-samasta-muted">
+        Bagikan kode ini ke tamu bersama link undangan. Tanpa kode, konten tidak bisa dibuka.
+      </p>
+    </div>
   </div>
 </template>

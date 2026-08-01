@@ -72,6 +72,8 @@ export interface Invitation {
   guests?: InvitationGuest[]
   managers?: InvitationManager[]
   settings?: Record<string, unknown>
+  /** True when password-protected and guest has not unlocked yet. */
+  locked?: boolean
 }
 
 export interface InvitationTransaction {

@@ -15,6 +15,7 @@ import MusicToggle from '~/themes/_shared/sections/MusicToggle.vue'
 import StreamingEmbed from '~/themes/_shared/sections/StreamingEmbed.vue'
 import MapsEmbed from '~/themes/_shared/sections/MapsEmbed.vue'
 import VendorCredits from '~/themes/_shared/sections/VendorCredits.vue'
+import GalleryCarousel from '~/themes/_shared/sections/GalleryCarousel.vue'
 import OrnamentField from './OrnamentField.vue'
 
 const props = defineProps<{
@@ -57,15 +58,6 @@ const displayTitle = computed(() => {
   if (names.length >= 2) return names.slice(0, 2).join(' & ')
   return props.invitation.title
 })
-
-function mediaStyle(url?: string) {
-  if (!url) return undefined
-  return {
-    backgroundImage: `url(${url})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  }
-}
 </script>
 
 <template>
@@ -192,22 +184,7 @@ function mediaStyle(url?: string) {
         </article>
       </div>
 
-      <div v-if="galleryItems.length" class="space-y-3 cp-fade-up">
-        <h2 class="cp-section-title">Galeri</h2>
-        <div class="grid grid-cols-2 gap-3">
-          <div
-            v-for="item in galleryItems"
-            :key="item.id"
-            class="relative flex aspect-square items-end overflow-hidden rounded-sm border border-[var(--cp-line)] bg-[var(--cp-cream)] p-3"
-            :style="mediaStyle(item.url)"
-          >
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-            <div class="relative z-10">
-              <p class="text-xs font-medium text-white">{{ item.label || 'Momen' }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <GalleryCarousel :items="galleryItems" class="cp-fade-up" />
 
       <MusicToggle
         class="cp-fade-up"

@@ -50,29 +50,50 @@ export function invitationByIdQueryOptions(id: string | number) {
   }
 }
 
-export function publicInvitationBySlugQueryOptions(slug: string) {
+export function publicInvitationBySlugQueryOptions(slug: string, accessCode?: string) {
   return {
-    key: INVITATION_QUERY_KEYS.bySlug(slug),
+    key: [...INVITATION_QUERY_KEYS.bySlug(slug), accessCode || ''] as const,
     query: () => {
       const $larafetch = useSanctumClient()
-      return $larafetch<{ data: Invitation }>(`/api/public/invitations/${slug}`)
+      const qs = accessCode ? `?accessCode=${encodeURIComponent(accessCode)}` : ''
+      return $larafetch<{ data: Invitation }>(`/api/public/invitations/${slug}${qs}`)
     },
   }
 }
 
+export async function unlockPublicInvitation(slug: string, accessCode: string) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: Invitation }>(`/api/public/invitations/${slug}/unlock`, {
+    method: 'POST',
+    body: { accessCode },
+  })
+}
+
 export async function submitPublicRsvp(slug: string, payload: PublicRsvpPayload) {
   const $larafetch = useSanctumClient()
+  const accessCode = import.meta.client
+    ? sessionStorage.getItem(`samasta-unlock:${slug}`) || undefined
+    : undefined
   return $larafetch<{ data: InvitationGuest; message: string }>(
     `/api/public/invitations/${slug}/rsvp`,
-    { method: 'POST', body: payload },
+    {
+      method: 'POST',
+      body: { ...payload, ...(accessCode ? { accessCode } : {}) },
+    },
   )
 }
 
 export async function submitPublicWish(slug: string, payload: PublicWishPayload) {
   const $larafetch = useSanctumClient()
+  const accessCode = import.meta.client
+    ? sessionStorage.getItem(`samasta-unlock:${slug}`) || undefined
+    : undefined
   return $larafetch<{ data: InvitationGuest; message: string }>(
     `/api/public/invitations/${slug}/wishes`,
-    { method: 'POST', body: payload },
+    {
+      method: 'POST',
+      body: { ...payload, ...(accessCode ? { accessCode } : {}) },
+    },
   )
 }
 
