@@ -50,6 +50,7 @@ const moduleComponents: Record<string, ReturnType<typeof resolveComponent>> = {
   quote: resolveComponent('InvitationEditorModulesQuoteModule'),
   settings: resolveComponent('InvitationEditorModulesSettingsModule'),
   share: resolveComponent('InvitationEditorModulesShareModule'),
+  vendors: resolveComponent('InvitationEditorModulesVendorsModule'),
 }
 
 const activeModule = computed(() => {

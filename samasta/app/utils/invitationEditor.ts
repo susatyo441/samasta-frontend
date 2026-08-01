@@ -1,6 +1,7 @@
 import type {
   Invitation,
   InvitationGift,
+  InvitationManager,
   InvitationMedia,
 } from '~/types'
 
@@ -25,6 +26,7 @@ export interface InvitationEditorDraft {
   loveStory: Array<{ year?: string; title?: string; description?: string }>
   music: { title?: string; autoplay?: boolean; url?: string }
   gift: InvitationGift
+  managers: InvitationManager[]
   settings: {
     showCountdown?: boolean
     showGuestBook?: boolean
@@ -79,6 +81,11 @@ export function createInvitationDraft(invitation: Invitation): InvitationEditorD
         ? structuredClone(invitation.gift.qrisImage)
         : null,
     }),
+    managers: structuredClone(
+      invitation.managers?.length
+        ? invitation.managers
+        : [{ name: '', role: '', instagram: '' }],
+    ),
     settings: {
       showCountdown: Boolean(invitation.settings?.showCountdown ?? true),
       showGuestBook: invitation.settings?.showGuestBook !== false,
@@ -172,6 +179,16 @@ export function buildModulePayload(moduleId: string, draft: InvitationEditorDraf
     case 'streaming':
       return {
         streamingUrl: draft.streamingUrl.trim() || '',
+      }
+    case 'vendors':
+      return {
+        managers: draft.managers
+          .map((vendor) => ({
+            name: vendor.name.trim(),
+            role: vendor.role?.trim() || undefined,
+            instagram: vendor.instagram?.trim() || undefined,
+          }))
+          .filter((vendor) => vendor.name),
       }
     case 'settings':
       return {

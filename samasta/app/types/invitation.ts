@@ -27,6 +27,12 @@ export interface InvitationMedia {
   url?: string
 }
 
+export interface InvitationManager {
+  name: string
+  role?: string
+  instagram?: string
+}
+
 /** @deprecated Prefer InvitationMedia */
 export type InvitationMediaItem = InvitationMedia
 
@@ -64,7 +70,7 @@ export interface Invitation {
   gift?: InvitationGift
   stats?: { guests: number; attending: number; messages: number }
   guests?: InvitationGuest[]
-  managers?: Array<{ name: string; role?: string }>
+  managers?: InvitationManager[]
   settings?: Record<string, unknown>
 }
 
@@ -104,6 +110,7 @@ export type InvitationUpdatePayload = Partial<
     | 'streamingUrl'
     | 'rsvpDeadline'
     | 'gift'
+    | 'managers'
     | 'settings'
   >
 >

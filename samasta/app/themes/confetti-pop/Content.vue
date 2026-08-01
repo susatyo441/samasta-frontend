@@ -14,6 +14,7 @@ import GiftAccounts from '~/themes/_shared/sections/GiftAccounts.vue'
 import MusicToggle from '~/themes/_shared/sections/MusicToggle.vue'
 import StreamingEmbed from '~/themes/_shared/sections/StreamingEmbed.vue'
 import MapsEmbed from '~/themes/_shared/sections/MapsEmbed.vue'
+import VendorCredits from '~/themes/_shared/sections/VendorCredits.vue'
 import OrnamentField from './OrnamentField.vue'
 
 const props = defineProps<{
@@ -224,6 +225,12 @@ function mediaStyle(url?: string) {
         v-if="showGuestBook"
         :slug="invitation.slug"
         :messages="guestMessages"
+        class="cp-fade-up"
+      />
+
+      <VendorCredits
+        v-if="invitation.managers?.length"
+        :vendors="invitation.managers"
         class="cp-fade-up"
       />
 
