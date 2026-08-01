@@ -126,6 +126,19 @@ export interface GuestPayload {
   message?: string
 }
 
+export interface PublicRsvpPayload {
+  name: string
+  rsvp: 'hadir' | 'tidak' | 'ragu'
+  quota?: number
+  guestId?: string
+}
+
+export interface PublicWishPayload {
+  name: string
+  message: string
+  guestId?: string
+}
+
 export interface EditorModule {
   id: string
   label: Record<string, string>

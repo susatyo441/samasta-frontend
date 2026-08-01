@@ -10,6 +10,8 @@ import type {
   InvitationTransaction,
   InvitationUpdatePayload,
   PaginatedInvitations,
+  PublicRsvpPayload,
+  PublicWishPayload,
   PublishInvitationResult,
 } from '~/types'
 import { unwrapResource } from '~/utils/unwrapResource'
@@ -56,6 +58,22 @@ export function publicInvitationBySlugQueryOptions(slug: string) {
       return $larafetch<{ data: Invitation }>(`/api/public/invitations/${slug}`)
     },
   }
+}
+
+export async function submitPublicRsvp(slug: string, payload: PublicRsvpPayload) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: InvitationGuest; message: string }>(
+    `/api/public/invitations/${slug}/rsvp`,
+    { method: 'POST', body: payload },
+  )
+}
+
+export async function submitPublicWish(slug: string, payload: PublicWishPayload) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: InvitationGuest; message: string }>(
+    `/api/public/invitations/${slug}/wishes`,
+    { method: 'POST', body: payload },
+  )
 }
 
 export function invitationTransactionsQueryOptions() {

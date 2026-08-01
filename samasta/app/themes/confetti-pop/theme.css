@@ -8,6 +8,16 @@
   --cp-parchment: #fffaf3;
   --cp-burgundy: #7a3e3e;
   --cp-line: rgba(196, 165, 116, 0.45);
+  --inv-section-accent: var(--cp-burgundy);
+  --inv-section-card-bg: var(--cp-parchment);
+  --inv-section-card-shadow: 0 8px 24px rgb(61 50 41 / 0.08);
+  --inv-section-input-border: var(--cp-line);
+  --inv-section-input-bg: #fff;
+  --inv-section-input-ring: rgb(122 62 62 / 0.25);
+  --inv-section-btn-bg: var(--cp-burgundy);
+  --inv-section-choice-bg: var(--cp-cream);
+  --inv-section-muted: var(--cp-muted);
+  --inv-section-message-bg: var(--cp-cream);
   color: var(--cp-ink);
   background:
     radial-gradient(ellipse at 50% 0%, rgba(232, 213, 181, 0.45), transparent 55%),
