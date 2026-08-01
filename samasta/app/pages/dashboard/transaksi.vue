@@ -4,9 +4,11 @@ definePageMeta({
   middleware: ['sanctum:auth'],
 })
 
+import { formatMoney } from '~/utils/formatMoney'
+
 useSeoMeta({ title: 'Transaksi – Samasta' })
 
-const { transactions } = useInvitations()
+const { transactions } = useInvitationTransactions()
 </script>
 
 <template>
@@ -25,7 +27,7 @@ const { transactions } = useInvitations()
         </div>
         <div class="text-right">
           <p class="font-display text-xl font-semibold text-samasta-burgundy">
-            Rp{{ trx.amount.toLocaleString('id-ID') }}
+            {{ formatMoney(trx.amount) }}
           </p>
           <p class="text-[11px] font-semibold uppercase text-samasta-sage">{{ trx.status }}</p>
         </div>

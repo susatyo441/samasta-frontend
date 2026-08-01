@@ -6,28 +6,27 @@ import {
   invitationTransactionsQueryOptions,
   publicInvitationBySlugQueryOptions,
 } from '~/queries/invitations'
-import type { Invitation, InvitationTransaction } from '~/types'
 import { unwrapResource } from '~/utils/unwrapResource'
 
-export function useInvitations() {
-  const listQuery = useQuery(invitationListQueryOptions())
-  const transactionsQuery = useQuery(invitationTransactionsQueryOptions())
-  const modulesQuery = useQuery(editorModulesQueryOptions())
+export function useInvitationList() {
+  const query = useQuery(invitationListQueryOptions())
+  const invitations = computed(() => query.data.value?.data ?? [])
 
-  const invitations = computed(() => listQuery.data.value?.data ?? [])
+  return { query, invitations }
+}
 
-  const transactions = computed(() => unwrapResource(transactionsQuery.data.value) ?? [])
+export function useInvitationTransactions() {
+  const query = useQuery(invitationTransactionsQueryOptions())
+  const transactions = computed(() => unwrapResource(query.data.value) ?? [])
 
-  const editorModules = computed(() => modulesQuery.data.value?.editorModules ?? [])
+  return { query, transactions }
+}
 
-  return {
-    invitations,
-    transactions,
-    editorModules,
-    listQuery,
-    transactionsQuery,
-    modulesQuery,
-  }
+export function useEditorModules() {
+  const query = useQuery(editorModulesQueryOptions())
+  const editorModules = computed(() => query.data.value?.editorModules ?? [])
+
+  return { query, editorModules }
 }
 
 export function useInvitationById(id: MaybeRefOrGetter<string | number>) {
@@ -55,5 +54,3 @@ export function usePublicInvitation(slug: MaybeRefOrGetter<string>) {
 
   return { query, invitation }
 }
-
-export type { Invitation, InvitationTransaction }

@@ -2,7 +2,13 @@
 const route = useRoute()
 const slug = computed(() => String(route.params.slug))
 const { invitation, query } = usePublicInvitation(slug)
-const isLoading = useQueryLoading(query)
+
+const isLoading = computed(() => {
+  const asyncStatus = query.asyncStatus?.value
+  if (asyncStatus) return asyncStatus === 'loading'
+
+  return query.status.value === 'pending'
+})
 
 const opened = ref(false)
 
