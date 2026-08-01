@@ -24,7 +24,17 @@ const titleMap: Record<string, string> = {
   settings: 'Pengaturan',
   guestbook: 'Buku Tamu',
   share: 'Kirim Undangan',
+  'event-planner': 'Event Planner',
 }
+
+const whatsappShareUrl = computed(() => {
+  if (!props.invitation?.publicUrl) return '#'
+  const link = import.meta.client
+    ? `${window.location.origin}${props.invitation.publicUrl}`
+    : props.invitation.publicUrl
+  const text = `Halo, kamu diundang! Buka undangan: ${link}`
+  return `https://wa.me/?text=${encodeURIComponent(text)}`
+})
 </script>
 
 <template>
@@ -162,7 +172,7 @@ const titleMap: Record<string, string> = {
           Lihat Halaman Undangan
         </NuxtLink>
         <a
-          :href="`https://wa.me/?text=${encodeURIComponent(`Halo, kamu diundang! Buka undangan: ${invitation.publicUrl}`)}"
+          :href="whatsappShareUrl"
           target="_blank"
           class="btn-secondary block w-full text-center"
         >
