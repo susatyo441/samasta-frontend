@@ -1,3 +1,11 @@
+export interface InvitationGift {
+  cashlessEnabled?: boolean
+  shippingEnabled?: boolean
+  wishlistEnabled?: boolean
+  bankAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  wishlistItems?: Array<{ name: string; price: number }>
+}
+
 export interface InvitationGuest {
   id: string
   name: string
@@ -36,7 +44,7 @@ export interface Invitation {
   music?: { title?: string; autoplay?: boolean }
   streamingUrl?: string
   rsvpDeadline?: string | null
-  gift?: Record<string, unknown>
+  gift?: InvitationGift
   stats?: { guests: number; attending: number; messages: number }
   guests?: InvitationGuest[]
   managers?: Array<{ name: string; role?: string }>

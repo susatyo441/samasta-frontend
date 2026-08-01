@@ -1,0 +1,17 @@
+---
+description: Always run lint, format check, and typecheck after Samasta frontend changes
+alwaysApply: true
+---
+
+# Samasta agent quality checks
+
+Working in `samasta-frontend` (app under `samasta/`):
+
+1. Prefer Syncphony-style layout: utils (pure), composables (reactive), queries, constants, feature components.
+2. After code changes, run from `samasta/`:
+   - `pnpm lint`
+   - `pnpm fmt:check`
+   - `pnpm typecheck`
+3. Fix all failures before finishing. Do not skip these checks.
+4. If CSS or Nuxt config changed, also run `pnpm postinstall` (nuxt prepare).
+5. See [AGENTS.md](AGENTS.md) and [samasta/README.md](samasta/README.md).

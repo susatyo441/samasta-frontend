@@ -7,14 +7,7 @@ import {
   publicInvitationBySlugQueryOptions,
 } from '~/queries/invitations'
 import type { Invitation, InvitationTransaction } from '~/types'
-
-function unwrapResource<T>(payload: T | { data: T } | null | undefined): T | null {
-  if (!payload) return null
-  if (typeof payload === 'object' && 'data' in payload) {
-    return payload.data
-  }
-  return payload
-}
+import { unwrapResource } from '~/utils/unwrapResource'
 
 export function useInvitations() {
   const listQuery = useQuery(invitationListQueryOptions())
@@ -23,20 +16,9 @@ export function useInvitations() {
 
   const invitations = computed(() => listQuery.data.value?.data ?? [])
 
-  const transactions = computed(() => {
-    const payload = transactionsQuery.data.value
-    return unwrapResource(payload) ?? []
-  })
+  const transactions = computed(() => unwrapResource(transactionsQuery.data.value) ?? [])
 
   const editorModules = computed(() => modulesQuery.data.value?.editorModules ?? [])
-
-  function getById(id: string | number) {
-    return invitations.value.find((item) => String(item.id) === String(id)) || null
-  }
-
-  function publicPath(slug: string) {
-    return `/u/${slug}`
-  }
 
   return {
     invitations,
@@ -45,8 +27,6 @@ export function useInvitations() {
     listQuery,
     transactionsQuery,
     modulesQuery,
-    getById,
-    publicPath,
   }
 }
 

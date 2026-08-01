@@ -4,9 +4,9 @@ definePageMeta({
   middleware: ['sanctum:auth'],
 })
 
-const { transactions } = useInvitations()
-
 useSeoMeta({ title: 'Transaksi – Samasta' })
+
+const { transactions } = useInvitations()
 </script>
 
 <template>

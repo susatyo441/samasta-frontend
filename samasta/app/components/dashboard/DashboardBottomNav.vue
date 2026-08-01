@@ -1,17 +1,5 @@
 <script setup lang="ts">
-const route = useRoute()
-
-const links = [
-  { to: '/dashboard', label: 'Home', icon: '⌂', exact: true },
-  { to: '/dashboard/undangan', label: 'Undangan', icon: '✉' },
-  { to: '/dashboard/transaksi', label: 'Transaksi', icon: '◈' },
-  { to: '/dashboard/bantuan', label: 'Bantuan', icon: '?' },
-]
-
-function isActive(to: string, exact?: boolean) {
-  if (exact) return route.path === to
-  return route.path === to || route.path.startsWith(`${to}/`)
-}
+const { links, isActive } = useDashboardNav()
 </script>
 
 <template>
@@ -23,7 +11,7 @@ function isActive(to: string, exact?: boolean) {
         <NuxtLink
           :to="link.to"
           class="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition"
-          :class="isActive(link.to, link.exact) ? 'bg-samasta-cream-dark text-samasta-burgundy' : 'text-samasta-muted'"
+          :class="isActive(link.match) ? 'bg-samasta-cream-dark text-samasta-burgundy' : 'text-samasta-muted'"
         >
           <span class="text-base leading-none">{{ link.icon }}</span>
           {{ link.label }}

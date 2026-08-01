@@ -1,17 +1,12 @@
 import type { AuthUserResource } from '~/types'
-import { extractErrorMessage } from '~/utils/handleMutationError'
+import { unwrapResource } from '~/utils/unwrapResource'
 
 export const useAuth = () => {
   const sanctumAuth = useSanctumAuth<{
     data: AuthUserResource
   }>()
 
-  const user = computed(() => {
-    const raw = sanctumAuth.user.value
-    if (!raw) return null
-    // Support both { data: user } (JsonResource) and flat user payloads.
-    return ('data' in raw ? raw.data : raw) as AuthUserResource
-  })
+  const user = computed(() => unwrapResource(sanctumAuth.user.value))
 
   const hasPermission = (permission: string | string[]) => {
     if (!user.value) return false
@@ -55,6 +50,5 @@ export const useAuth = () => {
     login,
     register,
     logout,
-    extractErrorMessage,
   }
 }

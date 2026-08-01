@@ -1,75 +1,59 @@
-# Nuxt Minimal Starter
+# Samasta
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Nuxt 4 frontend for Samasta wedding/birthday invitation SaaS. Talks to the **gsj-store** Laravel Sanctum API.
 
 ## Setup
 
-Make sure to install dependencies:
-
 ```bash
-# npm
-npm install
-
-# pnpm
+cd samasta
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+cp .env.example .env
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+Point `NUXT_PUBLIC_SANCTUM_BASE_URL` at gsj-store (default `http://localhost:8000`).
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+Demo login: `demo@samasta.app` / `samasta123` (seeded in gsj-store).
 
-Build the application for production:
+## Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | Dev server (`http://localhost:3000`) |
+| `pnpm build` | Production build |
+| `pnpm lint` | Oxlint (deny warnings) |
+| `pnpm fmt` | Format with oxfmt |
+| `pnpm fmt:check` | Check formatting |
+| `pnpm typecheck` | `vue-tsc --noEmit` |
+| `pnpm postinstall` | `nuxt prepare` |
+
+## Agent / AI checklist
+
+After any code change, always verify from this directory:
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+pnpm lint
+pnpm fmt:check
+pnpm typecheck
 ```
 
-Locally preview production build:
+Fix failures before considering the task done. See also [../AGENTS.md](../AGENTS.md).
 
-```bash
-# npm
-npm run preview
+## Project layout
 
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+```
+app/
+├── components/   # ui/, auth/, dashboard/, invitation/, landing/
+├── composables/
+├── constants/
+├── layouts/
+├── pages/
+├── queries/
+├── types/
+└── utils/
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Patterns mirror **syncphony_frontend**: pure helpers in `utils/`, Vue-aware logic in `composables/`, Pinia Colada in `queries/`.

@@ -1,22 +1,7 @@
 <script setup lang="ts">
-const route = useRoute()
-const { user, logout } = useAuth()
-
-const links = [
-  { to: '/dashboard', label: 'Home', icon: 'home', match: ['/dashboard'] },
-  { to: '/dashboard/undangan', label: 'Undangan', icon: 'invite', match: ['/dashboard/undangan'] },
-  { to: '/dashboard/transaksi', label: 'Transaksi', icon: 'trx', match: ['/dashboard/transaksi'] },
-  { to: '/dashboard/bantuan', label: 'Bantuan', icon: 'help', match: ['/dashboard/bantuan'] },
-]
-
-function isActive(match: string[]) {
-  return match.some((path) => route.path === path || route.path.startsWith(`${path}/`))
-}
-
-async function onLogout() {
-  await logout()
-  await navigateTo('/login')
-}
+const { links, isActive } = useDashboardNav()
+const { user } = useAuth()
+const { signOut } = useLogout()
 </script>
 
 <template>
@@ -39,7 +24,7 @@ async function onLogout() {
         class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition"
         :class="isActive(link.match) ? 'bg-white/10 text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'"
       >
-        <span class="text-base">{{ link.icon === 'home' ? '⌂' : link.icon === 'invite' ? '✉' : link.icon === 'trx' ? '◈' : '?' }}</span>
+        <span class="text-base">{{ link.icon }}</span>
         {{ link.label }}
       </NuxtLink>
     </nav>
@@ -57,7 +42,7 @@ async function onLogout() {
       <button
         type="button"
         class="w-full rounded-xl border border-white/15 px-3 py-2.5 text-left text-sm font-medium text-white/80 transition hover:bg-white/5 hover:text-white"
-        @click="onLogout"
+        @click="signOut"
       >
         Keluar / Logout
       </button>
