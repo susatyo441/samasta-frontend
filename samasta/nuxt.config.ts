@@ -31,6 +31,7 @@ export default defineNuxtConfig({
   fonts: {
     families: [
       { name: 'Cormorant Garamond', provider: 'google', weights: [400, 500, 600, 700] },
+      { name: 'Great Vibes', provider: 'google', weights: [400] },
       { name: 'Outfit', provider: 'google', weights: [300, 400, 500, 600, 700] },
     ],
   },

@@ -25,6 +25,7 @@ export default {
       },
       fontFamily: {
         display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        script: ['"Great Vibes"', 'cursive'],
         body: ['Outfit', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
