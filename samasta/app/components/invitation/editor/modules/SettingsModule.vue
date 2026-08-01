@@ -18,6 +18,14 @@ defineProps<{
       <textarea v-model="draft.greeting" rows="3" :class="EDITOR_INPUT_CLASS" />
     </div>
 
+    <div>
+      <label class="text-xs font-medium text-samasta-muted">Batas RSVP</label>
+      <input v-model="draft.rsvpDeadline" type="date" :class="EDITOR_INPUT_CLASS">
+      <p class="mt-1 text-xs text-samasta-muted">
+        Tamu tidak bisa konfirmasi kehadiran setelah tanggal ini. Kosongkan jika tidak ada batas.
+      </p>
+    </div>
+
     <label class="flex items-center gap-2 rounded-2xl border border-samasta-burgundy/10 px-3 py-3 text-sm">
       <input v-model="draft.settings.showCountdown" type="checkbox" class="rounded border-samasta-burgundy/30">
       Tampilkan countdown di tema

@@ -17,7 +17,7 @@ defineProps<{
       placeholder="https://youtube.com/live/..."
     >
     <p class="text-xs text-samasta-muted">
-      Link ini muncul di tema publik jika diisi.
+      Link YouTube akan ditampilkan sebagai pemutar video di undangan. Platform lain dibuka di tab baru.
     </p>
   </div>
 </template>

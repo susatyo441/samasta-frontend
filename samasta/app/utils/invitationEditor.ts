@@ -169,6 +169,7 @@ export function buildModulePayload(moduleId: string, draft: InvitationEditorDraf
       return {
         title: draft.title.trim(),
         greeting: draft.greeting,
+        rsvpDeadline: draft.rsvpDeadline || null,
         settings: {
           ...draft.settings,
         },

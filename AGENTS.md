@@ -44,3 +44,5 @@ cd samasta && pnpm install && pnpm dev
 ```
 
 Copy `samasta/.env.example` → `samasta/.env`. Demo user: `demo@samasta.app` / `samasta123`.
+
+Implementation phases: [../SAMASTA_ROADMAP.md](../SAMASTA_ROADMAP.md).

@@ -50,7 +50,10 @@ function removeEvent(index: number) {
       </div>
       <input v-model="event.venueName" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Nama venue">
       <input v-model="event.venueAddress" type="text" :class="EDITOR_INPUT_CLASS" placeholder="Alamat">
-      <input v-model="event.mapsUrl" type="url" :class="EDITOR_INPUT_CLASS" placeholder="https://maps.google.com/...">
+    <input v-model="event.mapsUrl" type="url" :class="EDITOR_INPUT_CLASS" placeholder="https://maps.google.com/...">
+      <p class="text-[11px] text-samasta-muted">
+        Link Google Maps ditampilkan sebagai peta embed di undangan. Alamat venue juga dipakai jika link kosong.
+      </p>
     </div>
   </div>
 </template>
