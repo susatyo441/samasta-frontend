@@ -16,6 +16,7 @@ export function usePublicGuestContext(invitation?: MaybeRefOrGetter<Invitation |
 
   const matchedGuest = computed(() => {
     const inv = invitation ? toValue(invitation) : null
+    if (inv?.viewerGuest) return inv.viewerGuest
     if (!inv?.guests?.length) return null
 
     if (guestId.value) {
@@ -38,15 +39,18 @@ export function usePublicGuestContext(invitation?: MaybeRefOrGetter<Invitation |
     () => matchedGuest.value?.name ?? guestNameFromQuery.value ?? null,
   )
 
-  const prefilledName = computed(() => guestName.value ?? '')
-
-  const hasPersonalization = computed(() => Boolean(guestName.value))
+  const checkInGuest = computed(() => {
+    const guest = matchedGuest.value
+    if (guest?.rsvp !== 'hadir' || !guest.checkInToken) return null
+    return guest
+  })
 
   return {
     guestId,
     guestName,
-    prefilledName,
+    prefilledName: computed(() => guestName.value ?? ''),
     matchedGuest,
-    hasPersonalization,
+    hasPersonalization: computed(() => Boolean(guestName.value)),
+    checkInGuest,
   }
 }

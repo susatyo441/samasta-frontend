@@ -44,8 +44,13 @@ export function useInvitationById(id: MaybeRefOrGetter<string | number>) {
 }
 
 export function usePublicInvitation(slug: MaybeRefOrGetter<string>) {
+  const route = useRoute()
   const invitationSlug = computed(() => toValue(slug))
   const accessCode = ref('')
+  const guestId = computed(() => {
+    const raw = route.query.guestId ?? route.query.guest
+    return raw ? String(raw) : undefined
+  })
 
   onMounted(() => {
     if (!import.meta.client) return
@@ -58,7 +63,11 @@ export function usePublicInvitation(slug: MaybeRefOrGetter<string>) {
   })
 
   const query = useQuery(() => ({
-    ...publicInvitationBySlugQueryOptions(invitationSlug.value, accessCode.value || undefined),
+    ...publicInvitationBySlugQueryOptions(
+      invitationSlug.value,
+      accessCode.value || undefined,
+      guestId.value,
+    ),
     enabled: Boolean(invitationSlug.value),
   }))
 

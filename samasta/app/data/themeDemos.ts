@@ -114,6 +114,7 @@ export const themeDemoInvitations: Record<string, Invitation> = {
         message: 'Selamat menempuh hidup baru! Semoga selalu diberkahi.',
         rsvp: 'hadir',
         quota: 2,
+        checkInToken: 'rania1',
       },
       {
         id: 'demo-w2',
@@ -121,6 +122,7 @@ export const themeDemoInvitations: Record<string, Invitation> = {
         message: 'Bahagia selalu untuk Nara & Bimas. Sampai jumpa di resepsi!',
         rsvp: 'hadir',
         quota: 1,
+        checkInToken: 'farhn2',
       },
     ],
     managers: [

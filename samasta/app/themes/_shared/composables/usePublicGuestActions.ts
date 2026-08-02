@@ -42,6 +42,7 @@ export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
   const rsvpSubmitting = ref(false)
   const rsvpSuccess = ref(false)
   const rsvpError = ref('')
+  const lastRsvpGuest = ref<InvitationGuest | null>(null)
 
   const wishSubmitting = ref(false)
   const wishSuccess = ref(false)
@@ -81,6 +82,16 @@ export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
     try {
       if (isStaticDemo) {
         await simulateDemoSubmit()
+        lastRsvpGuest.value =
+          payload.status === 'hadir'
+            ? {
+                id: 'gst-demo',
+                name: payload.name,
+                rsvp: 'hadir',
+                quota: payload.quota ?? 1,
+                checkInToken: 'nara01',
+              }
+            : null
         rsvpSuccess.value = true
         return true
       }
@@ -91,6 +102,7 @@ export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
         quota: payload.quota,
         guestId: guestId.value,
       })
+      lastRsvpGuest.value = result.data
       patchInvitationCache(result.data)
       rsvpSuccess.value = true
       return true
@@ -137,6 +149,7 @@ export function usePublicGuestActions(slug: MaybeRefOrGetter<string>) {
     rsvpSubmitting,
     rsvpSuccess,
     rsvpError,
+    lastRsvpGuest,
     wishSubmitting,
     wishSuccess,
     wishError,

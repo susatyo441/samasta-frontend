@@ -41,12 +41,20 @@ const analytics = computed(() => analyticsQuery.data.value?.data)
         >
           <span aria-hidden="true">←</span> Kembali ke undangan
         </NuxtLink>
-        <NuxtLink
-          :to="`/dashboard/undangan/${invitationId}/rsvp`"
-          class="btn-secondary !px-4 !py-2 text-xs"
-        >
-          Kelola tamu
-        </NuxtLink>
+        <div class="flex flex-wrap gap-2">
+          <NuxtLink
+            :to="`/dashboard/undangan/${invitationId}/check-in`"
+            class="btn-secondary !px-4 !py-2 text-xs"
+          >
+            Check-in venue
+          </NuxtLink>
+          <NuxtLink
+            :to="`/dashboard/undangan/${invitationId}/rsvp`"
+            class="btn-secondary !px-4 !py-2 text-xs"
+          >
+            Kelola tamu
+          </NuxtLink>
+        </div>
       </div>
 
       <div
@@ -57,7 +65,7 @@ const analytics = computed(() => analyticsQuery.data.value?.data)
       </div>
 
       <template v-else-if="analytics">
-        <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
           <div class="rounded-2xl border border-samasta-burgundy/10 bg-white px-3 py-3">
             <p class="text-[11px] text-samasta-muted">Diundang</p>
             <p class="mt-1 font-display text-2xl font-semibold text-samasta-burgundy">
@@ -77,12 +85,37 @@ const analytics = computed(() => analyticsQuery.data.value?.data)
             </p>
           </div>
           <div class="rounded-2xl border border-samasta-burgundy/10 bg-white px-3 py-3">
+            <p class="text-[11px] text-samasta-muted">Check-in</p>
+            <p class="mt-1 font-display text-2xl font-semibold text-samasta-burgundy">
+              {{ analytics.checkedIn }}
+            </p>
+          </div>
+          <div class="rounded-2xl border border-samasta-burgundy/10 bg-white px-3 py-3">
             <p class="text-[11px] text-samasta-muted">WA terkirim</p>
             <p class="mt-1 font-display text-2xl font-semibold text-green-700">
               {{ analytics.wa.terkirim }}
             </p>
           </div>
         </div>
+
+        <section class="rounded-2xl border border-samasta-burgundy/10 bg-white p-4 sm:p-5">
+          <h3 class="font-display text-xl font-semibold text-samasta-burgundy">
+            Kehadiran di venue
+          </h3>
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <div class="rounded-xl bg-green-50 px-3 py-3">
+              <p class="text-[11px] text-green-700">RSVP Hadir</p>
+              <p class="mt-1 text-2xl font-semibold text-green-800">{{ analytics.rsvp.hadir }}</p>
+            </div>
+            <div class="rounded-xl bg-samasta-cream px-3 py-3">
+              <p class="text-[11px] text-samasta-muted">Sudah check-in</p>
+              <p class="mt-1 text-2xl font-semibold text-samasta-burgundy">{{ analytics.checkedIn }}</p>
+            </div>
+          </div>
+          <p class="mt-3 text-xs text-samasta-muted">
+            Check-in dihitung dari scan QR / mark manual di pintu masuk, terpisah dari konfirmasi RSVP.
+          </p>
+        </section>
 
         <section class="rounded-2xl border border-samasta-burgundy/10 bg-white p-4 sm:p-5">
           <h3 class="font-display text-xl font-semibold text-samasta-burgundy">Status RSVP</h3>

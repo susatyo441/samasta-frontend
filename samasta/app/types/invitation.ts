@@ -20,12 +20,15 @@ export interface InvitationGuest {
   waStatus?: string | null
   waSentAt?: string | null
   waError?: string | null
+  checkInToken?: string | null
+  checkedInAt?: string | null
 }
 
 export interface InvitationAnalytics {
   invited: number
   seats: number
   wishes: number
+  checkedIn: number
   rsvp: { hadir: number; tidak: number; ragu: number; belum: number }
   wa: {
     terkirim: number
@@ -87,6 +90,8 @@ export interface Invitation {
   gift?: InvitationGift
   stats?: { guests: number; attending: number; messages: number }
   guests?: InvitationGuest[]
+  /** Personalized guest from `?guest=` — may include check-in token when RSVP is hadir. */
+  viewerGuest?: InvitationGuest | null
   managers?: InvitationManager[]
   settings?: Record<string, unknown>
   /** True when password-protected and guest has not unlocked yet. */

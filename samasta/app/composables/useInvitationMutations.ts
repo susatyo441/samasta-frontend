@@ -1,6 +1,8 @@
 import { useQueryCache } from '@pinia/colada'
 import {
   blastInvitationWhatsapp,
+  checkInInvitationGuest,
+  checkInInvitationGuestByToken,
   createInvitation,
   createInvitationGuest,
   deleteInvitationGuest,
@@ -10,6 +12,7 @@ import {
   INVITATION_QUERY_KEYS,
   publishInvitation,
   sendInvitationGuestWhatsapp,
+  undoInvitationGuestCheckIn,
   updateInvitation,
   updateInvitationGuest,
   uploadInvitationMedia,
@@ -134,6 +137,27 @@ export function useInvitationGuestMutations(invitationId: MaybeRefOrGetter<strin
     return result.data
   }
 
+  async function checkInByToken(token: string) {
+    const id = toValue(invitationId)
+    const result = await checkInInvitationGuestByToken(id, token)
+    await invalidate()
+    return result
+  }
+
+  async function checkInGuest(guestId: string | number) {
+    const id = toValue(invitationId)
+    const result = await checkInInvitationGuest(id, guestId)
+    await invalidate()
+    return result
+  }
+
+  async function undoCheckIn(guestId: string | number) {
+    const id = toValue(invitationId)
+    const result = await undoInvitationGuestCheckIn(id, guestId)
+    await invalidate()
+    return result.data
+  }
+
   return {
     createGuest,
     updateGuest,
@@ -141,5 +165,8 @@ export function useInvitationGuestMutations(invitationId: MaybeRefOrGetter<strin
     importCsv,
     blastWhatsapp,
     sendWhatsapp,
+    checkInByToken,
+    checkInGuest,
+    undoCheckIn,
   }
 }

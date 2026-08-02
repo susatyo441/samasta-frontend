@@ -53,12 +53,19 @@ export function invitationByIdQueryOptions(id: string | number) {
   }
 }
 
-export function publicInvitationBySlugQueryOptions(slug: string, accessCode?: string) {
+export function publicInvitationBySlugQueryOptions(
+  slug: string,
+  accessCode?: string,
+  guestId?: string,
+) {
   return {
-    key: [...INVITATION_QUERY_KEYS.bySlug(slug), accessCode || ''] as const,
+    key: [...INVITATION_QUERY_KEYS.bySlug(slug), accessCode || '', guestId || ''] as const,
     query: () => {
       const $larafetch = useSanctumClient()
-      const qs = accessCode ? `?accessCode=${encodeURIComponent(accessCode)}` : ''
+      const params = new URLSearchParams()
+      if (accessCode) params.set('accessCode', accessCode)
+      if (guestId) params.set('guest', guestId)
+      const qs = params.toString() ? `?${params.toString()}` : ''
       return $larafetch<{ data: Invitation }>(`/api/public/invitations/${slug}${qs}`)
     },
   }
@@ -310,6 +317,46 @@ export async function importInvitationGuests(invitationId: string | number, file
     message: string
     data: { imported: number; skipped: number; errors: Record<string, string> }
   }>(`/api/invitations/${invitationId}/guests/import`, { method: 'POST', body })
+}
+
+export async function checkInInvitationGuestByToken(
+  invitationId: string | number,
+  token: string,
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{
+    data: InvitationGuest
+    message: string
+    alreadyCheckedIn: boolean
+  }>(`/api/invitations/${invitationId}/check-in`, {
+    method: 'POST',
+    body: { token },
+  })
+}
+
+export async function checkInInvitationGuest(
+  invitationId: string | number,
+  guestId: string | number,
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{
+    data: InvitationGuest
+    message: string
+    alreadyCheckedIn: boolean
+  }>(`/api/invitations/${invitationId}/guests/${guestId}/check-in`, {
+    method: 'POST',
+  })
+}
+
+export async function undoInvitationGuestCheckIn(
+  invitationId: string | number,
+  guestId: string | number,
+) {
+  const $larafetch = useSanctumClient()
+  return $larafetch<{ data: InvitationGuest; message: string }>(
+    `/api/invitations/${invitationId}/guests/${guestId}/check-in`,
+    { method: 'DELETE' },
+  )
 }
 
 export function downloadGuestImportTemplate() {

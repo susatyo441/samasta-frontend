@@ -58,12 +58,21 @@ const stats = computed(() => {
     tidak: list.filter((g) => g.rsvp === 'tidak').length,
     ragu: list.filter((g) => g.rsvp === 'ragu').length,
     belum: list.filter((g) => !g.rsvp || g.rsvp === 'belum').length,
+    checkedIn: list.filter((g) => Boolean(g.checkedInAt)).length,
     seats: list.reduce((sum, g) => sum + (g.quota ?? 1), 0),
   }
 })
 
-const { createGuest, updateGuest, removeGuest, importCsv, blastWhatsapp, sendWhatsapp } =
-  useInvitationGuestMutations(invitationId)
+const {
+  createGuest,
+  updateGuest,
+  removeGuest,
+  importCsv,
+  blastWhatsapp,
+  sendWhatsapp,
+  checkInGuest,
+  undoCheckIn,
+} = useInvitationGuestMutations(invitationId)
 
 const showForm = ref(false)
 const editingGuest = ref<InvitationGuest | null>(null)
@@ -78,6 +87,7 @@ const form = ref({
 const csvInput = ref<HTMLInputElement | null>(null)
 const templateUrl = downloadGuestImportTemplate()
 const showInviteSheet = ref(false)
+const qrGuest = ref<InvitationGuest | null>(null)
 
 const rsvpLabels: Record<string, string> = {
   belum: 'Belum',
@@ -203,6 +213,18 @@ const { mutate: runSendOne, isLoading: sendingOne } = useMutation({
   onError: (err) => handleMutationError(err),
 })
 
+const { mutate: runCheckIn, isLoading: checkingIn } = useMutation({
+  mutation: (guest: InvitationGuest) => checkInGuest(guestDbId(guest.id)),
+  onSuccess: (result) => toast.success(result.message),
+  onError: (err) => handleMutationError(err),
+})
+
+const { mutate: runUndoCheckIn, isLoading: undoingCheckIn } = useMutation({
+  mutation: (guest: InvitationGuest) => undoCheckIn(guestDbId(guest.id)),
+  onSuccess: () => toast.success('Check-in dibatalkan.'),
+  onError: (err) => handleMutationError(err),
+})
+
 function confirmBlast() {
   const withPhone = filteredGuests.value.filter((guest) => guest.phone?.trim()).length
   if (!withPhone) {
@@ -233,6 +255,12 @@ function confirmBlast() {
         </NuxtLink>
 
         <div class="flex flex-wrap gap-2">
+          <NuxtLink
+            :to="`/dashboard/undangan/${invitationId}/check-in`"
+            class="btn-secondary !px-4 !py-2 text-xs"
+          >
+            Check-in venue
+          </NuxtLink>
           <NuxtLink
             :to="`/dashboard/undangan/${invitationId}/analytics`"
             class="btn-secondary !px-4 !py-2 text-xs"
@@ -272,7 +300,7 @@ function confirmBlast() {
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         <div class="rounded-2xl border border-samasta-burgundy/10 bg-white px-3 py-3">
           <p class="text-[11px] text-samasta-muted">Total</p>
           <p class="mt-1 font-display text-2xl font-semibold text-samasta-burgundy">{{ stats.total }}</p>
@@ -289,7 +317,11 @@ function confirmBlast() {
           <p class="text-[11px] text-samasta-muted">Belum</p>
           <p class="mt-1 font-display text-2xl font-semibold text-amber-700">{{ stats.belum }}</p>
         </div>
-        <div class="col-span-2 rounded-2xl border border-samasta-burgundy/10 bg-white px-3 py-3 sm:col-span-1">
+        <div class="rounded-2xl border border-samasta-burgundy/10 bg-white px-3 py-3">
+          <p class="text-[11px] text-samasta-muted">Check-in</p>
+          <p class="mt-1 font-display text-2xl font-semibold text-samasta-burgundy">{{ stats.checkedIn }}</p>
+        </div>
+        <div class="rounded-2xl border border-samasta-burgundy/10 bg-white px-3 py-3">
           <p class="text-[11px] text-samasta-muted">Kursi</p>
           <p class="mt-1 font-display text-2xl font-semibold text-samasta-charcoal">{{ stats.seats }}</p>
         </div>
@@ -331,6 +363,7 @@ function confirmBlast() {
                 <th class="hidden px-4 py-3 font-semibold sm:table-cell">Telepon</th>
                 <th class="px-4 py-3 font-semibold">Kuota</th>
                 <th class="px-4 py-3 font-semibold">RSVP</th>
+                <th class="px-4 py-3 font-semibold">Check-in</th>
                 <th class="px-4 py-3 font-semibold">WA</th>
                 <th class="px-4 py-3 font-semibold text-right">Aksi</th>
               </tr>
@@ -362,6 +395,16 @@ function confirmBlast() {
                 </td>
                 <td class="px-4 py-3">
                   <span
+                    v-if="guest.checkedInAt"
+                    class="inline-flex rounded-full bg-samasta-cream px-2.5 py-1 text-[11px] font-semibold text-samasta-burgundy"
+                    :title="new Date(guest.checkedInAt).toLocaleString('id-ID')"
+                  >
+                    Masuk
+                  </span>
+                  <span v-else class="text-xs text-samasta-muted">—</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
                     class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold"
                     :class="waStatusClasses(guest.waStatus)"
                     :title="guest.waError || undefined"
@@ -378,6 +421,32 @@ function confirmBlast() {
                       @click="copyGuestLink(guest)"
                     >
                       Link
+                    </button>
+                    <button
+                      v-if="guest.checkInToken"
+                      type="button"
+                      class="text-xs font-semibold text-samasta-burgundy hover:underline"
+                      @click="qrGuest = guest"
+                    >
+                      QR
+                    </button>
+                    <button
+                      v-if="!guest.checkedInAt"
+                      type="button"
+                      class="text-xs font-semibold text-samasta-burgundy hover:underline"
+                      :disabled="checkingIn || undoingCheckIn"
+                      @click="runCheckIn(guest)"
+                    >
+                      Check-in
+                    </button>
+                    <button
+                      v-else
+                      type="button"
+                      class="text-xs font-semibold text-amber-700 hover:underline"
+                      :disabled="checkingIn || undoingCheckIn"
+                      @click="runUndoCheckIn(guest)"
+                    >
+                      Batalkan
                     </button>
                     <a
                       :href="guestWhatsappUrl(guest)"
@@ -415,7 +484,7 @@ function confirmBlast() {
                 </td>
               </tr>
               <tr v-if="!filteredGuests.length">
-                <td colspan="7" class="px-4 py-10 text-center text-samasta-muted">
+                <td colspan="8" class="px-4 py-10 text-center text-samasta-muted">
                   {{ guests.length ? 'Tidak ada tamu yang cocok dengan filter.' : 'Belum ada tamu. Tambah manual atau import CSV.' }}
                 </td>
               </tr>
@@ -482,6 +551,12 @@ function confirmBlast() {
       :public-path="invitation.publicUrl"
       :invitation-title="invitation.title"
       @close="showInviteSheet = false"
+    />
+
+    <InvitationGuestCheckInQrSheet
+      v-if="qrGuest"
+      :guest="qrGuest"
+      @close="qrGuest = null"
     />
   </div>
 </template>

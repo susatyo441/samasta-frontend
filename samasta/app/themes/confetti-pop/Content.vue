@@ -197,7 +197,12 @@ const displayTitle = computed(() => {
       <StreamingEmbed v-if="invitation.streamingUrl" :url="invitation.streamingUrl" class="cp-fade-up" />
 
       <GiftAccounts :gift="gift" class="cp-fade-up" />
-      <RsvpForm :slug="invitation.slug" :deadline="invitation.rsvpDeadline" class="cp-fade-up" />
+      <RsvpForm
+        :slug="invitation.slug"
+        :invitation="invitation"
+        :deadline="invitation.rsvpDeadline"
+        class="cp-fade-up"
+      />
       <WishList
         v-if="showGuestBook"
         :slug="invitation.slug"

@@ -153,12 +153,18 @@ function onActiveChange() {
             :messages="invitation.stats?.messages ?? 0"
           />
 
-          <div class="mt-4 grid grid-cols-2 gap-2">
+          <div class="mt-4 grid grid-cols-3 gap-2">
             <NuxtLink
               :to="`/dashboard/undangan/${invitation.id}/rsvp`"
               class="inline-flex items-center justify-center rounded-xl bg-white/15 px-3 py-2.5 text-xs font-semibold text-white ring-1 ring-white/25"
             >
               RSVP & Tamu
+            </NuxtLink>
+            <NuxtLink
+              :to="`/dashboard/undangan/${invitation.id}/check-in`"
+              class="inline-flex items-center justify-center rounded-xl bg-white/15 px-3 py-2.5 text-xs font-semibold text-white ring-1 ring-white/25"
+            >
+              Check-in
             </NuxtLink>
             <NuxtLink
               :to="`/dashboard/undangan/${invitation.id}/analytics`"
@@ -194,13 +200,13 @@ function onActiveChange() {
             </span>
           </p>
 
-          <button
-            type="button"
+          <NuxtLink
+            :to="`/dashboard/undangan/${invitation.id}/check-in`"
             class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2A1F22] px-4 py-3.5 text-sm font-semibold text-white"
           >
             <span aria-hidden="true">▣</span>
             Buka Layar Penerima Tamu
-          </button>
+          </NuxtLink>
 
           <InvitationFeatureGrid
             :event-type="(invitation.eventType as 'wedding' | 'birthday' | 'other')"
